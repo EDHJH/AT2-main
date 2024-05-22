@@ -1,6 +1,9 @@
 class Character:
     MAX_LEVEL = 50  # Maximum level a character can reach
     ATTRIBUTE_POINTS_PER_LEVEL = 3  # Number of attribute points gained per level
+    __name = None
+    
+
 
     def __init__(self, name, character_class, armor):
         self.name = name  # Character's name
