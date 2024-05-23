@@ -24,7 +24,7 @@ class Map:
         self.player_type = None
         self.player_position = [self.window.get_width() / 2, self.window.get_height() / 2]
         self.enemies = [
-            Enemy(GAME_ASSETS["goblin"], [50, 50], self.window),
+            Enemy(GAME_ASSETS["goblinking"], [10, 10], self.window),
             Enemy(GAME_ASSETS["orc"], [self.window.get_width() - 120, 50], self.window),
             Enemy(GAME_ASSETS["skeleton"], [50, self.window.get_height() - 120], self.window),
             Enemy(GAME_ASSETS["skeleton"], [self.window.get_width() - 120, self.window.get_height() - 120], self.window)

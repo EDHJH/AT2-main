@@ -4,7 +4,7 @@ import random
 class Goblin:
     def __init__(self, position, window):
         # Load the goblin image from the specified path
-        self.image = pygame.image.load("AT2/assets/goblin.png").convert_alpha()  # Ensure the image path is correct
+        self.image = pygame.image.load("AT2/assets/mobs/goblinking.png").convert_alpha()  # Ensure the image path is correct
         self.position = position  # Store the initial position of the goblin
         self.window = window  # Store the game window object
 

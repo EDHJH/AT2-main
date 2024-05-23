@@ -2,6 +2,13 @@ import pygame
 import random
 
 class Enemy:
+
+# Setting Attributes
+    _image = None
+    _posiiton = None
+    _window = None
+    _health = None
+
     def __init__(self, image_path, position, window):
         # Load the enemy image from the specified image path
         self.image = pygame.image.load(image_path).convert_alpha()
@@ -18,6 +25,7 @@ class Enemy:
         # Set the initial health of the enemy to 100
         self.health = 100
 
+# 
     def take_damage(self, damage):
         # Reduce the enemy's health by the specified damage amount
         self.health -= damage
