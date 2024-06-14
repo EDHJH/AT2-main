@@ -4,10 +4,10 @@ import random
 class Enemy:
 
 # Setting Attributes
-    _image = None
-    _posiiton = None
-    _window = None
-    _health = None
+    __image = None
+    __posiiton = None
+    __window = None
+    __health = None
 
     def __init__(self, image_path, position, window):
         # Load the enemy image from the specified image path
