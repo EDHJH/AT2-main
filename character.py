@@ -1,21 +1,21 @@
+import pygame
+
 class Character:
-    # Class constants
-    MAX_LEVEL = 50  # Maximum level a character can reach
-    ATTRIBUTE_POINTS_PER_LEVEL = 3  # Number of attribute points gained per level
+    MAX_LEVEL = 50
+    ATTRIBUTE_POINTS_PER_LEVEL = 3
 
     def __init__(self, name, character_class, armor):
-        # Private attributes
-        self.__name = name  
-        self.__character_class = character_class  
-        self.__armor = armor  
-        self.__level = 1  
-        self.__experience_points = 0 
-        self.__hit_points = 10 
-        self.__armor_class = 10 
-        self.__skills = {} 
-        self.__inventory = []  
-        self.__gold = 0  
-        self.__attribute_points = 0 
+        self.__name = name
+        self.__character_class = character_class
+        self.__armor = armor
+        self.__level = 1
+        self.__experience_points = 0
+        self.__hit_points = 10
+        self.__armor_class = 10
+        self.__skills = {}
+        self.__inventory = []
+        self.__gold = 0
+        self.__attribute_points = 0
 
     # Getter methods
     def get_name(self):
@@ -51,7 +51,7 @@ class Character:
     def get_attribute_points(self):
         return self.__attribute_points
 
-    # Setter Methods
+    # Setter methods
     def set_name(self, name):
         self.__name = name
 
@@ -71,39 +71,42 @@ class Character:
         self.__gold = gold
 
     def assign_attribute_points(self, attribute, points):
-        # Ensure the attribute exists before assigning points
-        if attribute in self.__dict__:
-            setattr(self, attribute, getattr(self, attribute) + points)  # Add points to the attribute
-            self.__attribute_points -= points  # Decrease available attribute points
+        if hasattr(self, f"_{self.__class__.__name__}__{attribute}") and points > 0 and self.__attribute_points >= points:
+            setattr(self, f"_{self.__class__.__name__}__{attribute}", getattr(self, f"_{self.__class__.__name__}__{attribute}") + points)
+            self.__attribute_points -= points
         else:
-            print(f"Error: Attribute '{attribute}' does not exist.")
+            print(f"Error: Cannot assign {points} points to attribute '{attribute}'.")
 
     def gain_experience(self, experience):
-        self.__experience_points += experience  # Increase character's experience points
-        # Calculate experience required for next level
+        self.__experience_points += experience
         required_experience = self.calculate_required_experience(self.__level + 1)
-        # Check if character has enough experience to level up and is below the level cap
         while self.__experience_points >= required_experience and self.__level < self.MAX_LEVEL:
-            self.__level += 1  # Level up the character
-            self.__experience_points -= required_experience  # Decrease character's experience points
-            self.__hit_points += 10  # Example: Increase hit points by 10 each level up
-            self.__attribute_points += self.ATTRIBUTE_POINTS_PER_LEVEL  # Allocate attribute points
+            self.__level += 1
+            self.__experience_points -= required_experience
+            self.__hit_points += 10
+            self.__attribute_points += self.ATTRIBUTE_POINTS_PER_LEVEL
             print(f"Level up! {self.__name} is now level {self.__level}.")
-            # Calculate experience required for next level
             required_experience = self.calculate_required_experience(self.__level + 1)
 
     def calculate_required_experience(self, level):
-        # Example exponential scaling: Each level requires 100 more experience points than the previous level
         return int(100 * (1.5 ** (level - 1)))
 
     def is_alive(self):
         return self.__hit_points > 0
 
     def take_damage(self, amount):
-        # Calculate the actual damage taken, taking into account the character's armor
         actual_damage = max(0, amount - self.__armor)
         self.__hit_points -= actual_damage
         if self.__hit_points <= 0:
             print(f"{self.__name} takes {actual_damage} damage and has been defeated!")
         else:
             print(f"{self.__name} takes {actual_damage} damage. Remaining hit points: {self.__hit_points}")
+
+    def draw_health_bar(self, window, x, y):
+        bar_width = 100
+        bar_height = 10
+        fill = (self.__hit_points / 10) * bar_width
+        outline_rect = pygame.Rect(x, y, bar_width, bar_height)
+        fill_rect = pygame.Rect(x, y, fill, bar_height)
+        pygame.draw.rect(window, (255, 0, 0), fill_rect)
+        pygame.draw.rect(window, (255, 255, 255), outline_rect, 2)
