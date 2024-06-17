@@ -1,16 +1,14 @@
-import random
+# map.py
 import pygame
-from assets import GAME_ASSETS
+import random
 from enemy import Enemy
+from goblin import Goblin
+from orc import Orc
+from skeleton import Skeleton
+from assets import GAME_ASSETS
 
 class Map:
     def __init__(self, window):
-        """
-        Initialize the Map class.
-
-        Args:
-            window (pygame.Surface): The game window surface.
-        """
         self.__window = window
         self.__map_image = pygame.image.load(GAME_ASSETS["dungeon_map"]).convert_alpha()
         self.__map_image = pygame.transform.scale(self.__map_image, (self.__window.get_width(), self.__window.get_height()))
@@ -22,34 +20,22 @@ class Map:
         self.__player_type = None
         self.__player_position = [self.__window.get_width() / 2, self.__window.get_height() / 2]
         self.__enemies = [
-            Enemy(GAME_ASSETS["goblinking"], [10, 10], self.__window),
-            Enemy(GAME_ASSETS["orc"], [self.__window.get_width() - 120, 50], self.__window),
-            Enemy(GAME_ASSETS["skeleton"], [50, self.__window.get_height() - 120], self.__window),
-            Enemy(GAME_ASSETS["skeleton"], [self.__window.get_width() - 120, self.__window.get_height() - 120], self.__window)
+            Goblin([10, 10], self.__window),
+            Orc([self.__window.get_width() - 120, 50], self.__window),
+            Skeleton([50, self.__window.get_height() - 120], self.__window),
+            Skeleton([self.__window.get_width() - 120, self.__window.get_height() - 120], self.__window)
         ]
-        self.__in_combat = False  # Ensure this attribute is defined in the constructor
+        self.__in_combat = False
         self.__current_enemy = None
         self.__blue_orb = None
         self.__game_over = False
 
     def load_player(self, character_type):
-        """
-        Load the player character.
-
-        Args:
-            character_type (str): The type of character to load.
-        """
         self.__player_type = character_type
         self.__player_image = self.__player_images[character_type]
         self.__player_image = pygame.transform.scale(self.__player_image, (int(self.__player_image.get_width() * 0.15), int(self.__player_image.get_height() * 0.15)))
 
     def check_for_combat(self):
-        """
-        Check if the player is in combat with any enemy.
-
-        Returns:
-            bool: True if the player is in combat, False otherwise.
-        """
         for enemy in self.__enemies:
             if pygame.math.Vector2(enemy.get_position()).distance_to(self.__player_position) < 50:
                 self.__in_combat = True
@@ -58,9 +44,6 @@ class Map:
         return False
 
     def handle_combat(self):
-        """
-        Handle combat between the player and the current enemy.
-        """
         if self.__in_combat and self.__current_enemy:
             player_damage = random.randint(5, 10)
             enemy_defeated = self.__current_enemy.take_damage(player_damage)
@@ -79,20 +62,11 @@ class Map:
                 # self.player.take_damage(enemy_damage)
 
     def spawn_blue_orb(self):
-        """
-        Spawn the blue orb in the center of the map.
-        """
         self.__blue_orb = pygame.image.load(GAME_ASSETS["blue_orb"]).convert_alpha()
         self.__blue_orb = pygame.transform.scale(self.__blue_orb, (50, 50))
         self.__orb_position = [self.__window.get_width() / 2 - 25, self.__window.get_height() / 2 - 25]
 
     def check_orb_collision(self):
-        """
-        Check if the player has collided with the blue orb.
-
-        Returns:
-            bool: True if the player has collided with the blue orb, False otherwise.
-        """
         if self.__blue_orb and pygame.math.Vector2(self.__orb_position).distance_to(self.__player_position) < 25:
             self.__game_over = True
             print("YOU WIN")  # This can be modified to a more visual display if needed.
@@ -100,12 +74,6 @@ class Map:
         return False
 
     def handle_events(self):
-        """
-        Handle user input events.
-
-        Returns:
-            str: 'quit' if the game is over and should be exited, None otherwise.
-        """
         if self.__game_over:
             return 'quit'  # Stop processing events if game is over
 
@@ -129,9 +97,6 @@ class Map:
             return 'quit'
 
     def draw(self):
-        """
-        Draw the game objects on the window.
-        """
         self.__window.fill((0, 0, 0))
         self.__window.blit(self.__map_image, (0, 0))
         self.__window.blit(self.__player_image, (self.__player_position[0], self.__player_position[1]))
@@ -141,65 +106,63 @@ class Map:
             self.__window.blit(self.__blue_orb, self.__orb_position)
         pygame.display.flip()
 
-    # Getter methods
+    # Getter and Setter methods
     def get_window(self):
         return self.__window
+
+    def set_window(self, window):
+        self.__window = window
 
     def get_map_image(self):
         return self.__map_image
 
-    def get_player_images(self):
-        return self.__player_images
-
-    def get_player_type(self):
-        return self.__player_type
-
-    def get_player_position(self):
-        return self.__player_position
-
-    def get_enemies(self):
-        return self.__enemies
-
-    def get_in_combat(self):
-        return self.__in_combat
-
-    def get_current_enemy(self):
-        return self.__current_enemy
-
-    def get_blue_orb(self):
-        return self.__blue_orb
-
-    def get_game_over(self):
-        return self.__game_over
-
-    # Setter methods
-    def set_window(self, window):
-        self.__window = window
-
     def set_map_image(self, map_image):
         self.__map_image = map_image
+
+    def get_player_images(self):
+        return self.__player_images
 
     def set_player_images(self, player_images):
         self.__player_images = player_images
 
+    def get_player_type(self):
+        return self.__player_type
+
     def set_player_type(self, player_type):
         self.__player_type = player_type
+
+    def get_player_position(self):
+        return self.__player_position
 
     def set_player_position(self, player_position):
         self.__player_position = player_position
 
+    def get_enemies(self):
+        return self.__enemies
+
     def set_enemies(self, enemies):
         self.__enemies = enemies
+
+    def get_in_combat(self):
+        return self.__in_combat
 
     def set_in_combat(self, in_combat):
         self.__in_combat = in_combat
 
+    def get_current_enemy(self):
+        return self.__current_enemy
+
     def set_current_enemy(self, current_enemy):
         self.__current_enemy = current_enemy
+
+    def get_blue_orb(self):
+        return self.__blue_orb
 
     def set_blue_orb(self, blue_orb):
         self.__blue_orb = blue_orb
 
+    def get_game_over(self):
+        return self.__game_over
+
     def set_game_over(self, game_over):
         self.__game_over = game_over
-

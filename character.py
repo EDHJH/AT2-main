@@ -1,43 +1,62 @@
 import pygame
+# character.py
 
 class Character:
     MAX_LEVEL = 50
     ATTRIBUTE_POINTS_PER_LEVEL = 3
 
-    def __init__(self, name, character_class, armor):
+    def __init__(self, name, character_class, armor, max_hp):
         self.__name = name
         self.__character_class = character_class
         self.__armor = armor
         self.__level = 1
         self.__experience_points = 0
-        self.__hit_points = 10
-        self.__armor_class = 10
+        self.__hit_points = max_hp
+        self.__armor_class = armor
         self.__skills = {}
         self.__inventory = []
         self.__gold = 0
         self.__attribute_points = 0
 
-    # Getter methods
+    # Getter and Setter methods
     def get_name(self):
         return self.__name
+
+    def set_name(self, name):
+        self.__name = name
 
     def get_character_class(self):
         return self.__character_class
 
+    def set_character_class(self, character_class):
+        self.__character_class = character_class
+
     def get_armor(self):
         return self.__armor
 
-    def get_level(self):
-        return self.__level
-
-    def get_experience_points(self):
-        return self.__experience_points
+    def set_armor(self, armor):
+        self.__armor = armor
 
     def get_hit_points(self):
         return self.__hit_points
 
+    def set_hit_points(self, hit_points):
+        self.__hit_points = hit_points
+
     def get_armor_class(self):
         return self.__armor_class
+
+    def set_armor_class(self, armor_class):
+        self.__armor_class = armor_class
+
+    def get_experience_points(self):
+        return self.__experience_points
+
+    def set_experience_points(self, experience_points):
+        self.__experience_points = experience_points
+
+    def get_level(self):
+        return self.__level
 
     def get_skills(self):
         return self.__skills
@@ -48,27 +67,11 @@ class Character:
     def get_gold(self):
         return self.__gold
 
-    def get_attribute_points(self):
-        return self.__attribute_points
-
-    # Setter methods
-    def set_name(self, name):
-        self.__name = name
-
-    def set_character_class(self, character_class):
-        self.__character_class = character_class
-
-    def set_armor(self, armor):
-        self.__armor = armor
-
-    def set_hit_points(self, hit_points):
-        self.__hit_points = hit_points
-
-    def set_armor_class(self, armor_class):
-        self.__armor_class = armor_class
-
     def set_gold(self, gold):
         self.__gold = gold
+
+    def get_attribute_points(self):
+        return self.__attribute_points
 
     def assign_attribute_points(self, attribute, points):
         if hasattr(self, f"_{self.__class__.__name__}__{attribute}") and points > 0 and self.__attribute_points >= points:
@@ -110,3 +113,9 @@ class Character:
         fill_rect = pygame.Rect(x, y, fill, bar_height)
         pygame.draw.rect(window, (255, 0, 0), fill_rect)
         pygame.draw.rect(window, (255, 255, 255), outline_rect, 2)
+
+    def attack(self, target):
+        raise NotImplementedError("Subclasses should implement this method")
+
+    def special_ability(self, target):
+        raise NotImplementedError("Subclasses should implement this method")

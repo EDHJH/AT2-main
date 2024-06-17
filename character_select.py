@@ -1,22 +1,10 @@
+# character_select.py
 import pygame
 from assets import GAME_ASSETS
 
 class CharacterSelect:
     """
     A class representing the character selection screen.
-
-    Attributes:
-        __window (pygame.Surface): The game window surface.
-        __font (pygame.font.Font): The font used for text rendering.
-        __background_image (pygame.Surface): The background image of the character selection screen.
-        __characters (dict): A dictionary mapping character names to their corresponding button images.
-        __character_buttons (dict): A dictionary mapping character names to their button rectangles.
-        __back_button (pygame.Rect): The rectangle representing the back button.
-
-    Methods:
-        __init__(self, window): Initializes the CharacterSelect object.
-        __setup_character_buttons(self): Sets up the character buttons.
-        run(self): Runs the character selection screen loop.
     """
 
     def __init__(self, window):
@@ -92,3 +80,40 @@ class CharacterSelect:
                             return character
 
         return None
+
+    # Getter and Setter methods
+    def get_window(self):
+        return self.__window
+
+    def set_window(self, window):
+        self.__window = window
+
+    def get_font(self):
+        return self.__font
+
+    def set_font(self, font):
+        self.__font = font
+
+    def get_background_image(self):
+        return self.__background_image
+
+    def set_background_image(self, background_image):
+        self.__background_image = background_image
+
+    def get_characters(self):
+        return self.__characters
+
+    def set_characters(self, characters):
+        self.__characters = characters
+
+    def get_character_buttons(self):
+        return self.__character_buttons
+
+    def set_character_buttons(self, character_buttons):
+        self.__character_buttons = character_buttons
+
+    def get_back_button(self):
+        return self.__back_button
+
+    def set_back_button(self, back_button):
+        self.__back_button = back_button
