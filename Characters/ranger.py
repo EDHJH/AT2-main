@@ -1,5 +1,5 @@
 # ranger.py
-from character import Character
+from Characters.character import Character
 
 class Ranger(Character):
     def __init__(self, name, max_hp):

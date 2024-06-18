@@ -1,4 +1,4 @@
-from character import Character
+from Characters.character import Character
 
 class Necromancer(Character):
     def __init__(self, name, max_hp):
