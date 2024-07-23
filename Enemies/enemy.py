@@ -8,7 +8,7 @@ class Enemy:
         self.position = position
         self.window = window
         self.health = 100
-        self.name = name  # Add name attribute
+        self.name = name
 
     def take_damage(self, damage):
         self.health -= damage
@@ -26,3 +26,9 @@ class Enemy:
 
     def get_hit_points(self):
         return self.health
+
+    def attack(self, target):
+        damage = random.randint(5, 15)  # Random damage between 5 and 15
+        print(f"\n{self.get_name()} attacks {target.get_name()} and deals {damage} damage!")
+        target.take_damage(damage)
+        return damage

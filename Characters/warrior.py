@@ -10,7 +10,7 @@ class Warrior(Character):
         self.__max_hp = max_hp
         self.__current_hp = max_hp
         self.__attacks = {
-            "Basic Attack": {"method": self.basic_attack, "stamina_cost": 10},
+            "Basic Attack": {"method": self.basic_attack, "stamina_cost": 0},
             "Charge": {"method": self.charge, "stamina_cost": 20},
             "Cleave Attack": {"method": self.cleave_attack, "stamina_cost": 30},
             "Shield Bash": {"method": self.shield_bash, "stamina_cost": 15},
@@ -53,23 +53,27 @@ class Warrior(Character):
 
     def basic_attack(self, target):
         print(f"{self.get_name()} performs a basic attack on {target.get_name()}!")
-        target.take_damage(self.__strength)
+        damage = self.__strength
+        target.take_damage(damage)
+        return damage
 
     def charge(self, target):
         print(f"{self.get_name()} charges towards {target.get_name()}!")
-        target.take_damage(self.__strength)
+        damage = self.__strength
+        target.take_damage(damage)
+        return damage
 
-    def cleave_attack(self, targets):
-        total_damage = 0
-        for target in targets:
-            print(f"{self.get_name()} cleaves {target.get_name()}!")
-            target.take_damage(self.__strength * 2)
-            total_damage += self.__strength * 2
-        print(f"{self.get_name()} dealt a total of {total_damage} damage with cleave!")
+    def cleave_attack(self, target):
+        print(f"{self.get_name()} cleaves {target.get_name()}!")
+        damage = self.__strength * 2
+        target.take_damage(damage)
+        return damage
 
     def shield_bash(self, target):
         print(f"{self.get_name()} performs a shield bash on {target.get_name()}!")
-        target.take_damage(self.__strength + 5)
+        damage = self.__strength + 5
+        target.take_damage(damage)
+        return damage
 
     def defensive_stance(self):
         print(f"{self.get_name()} enters a defensive stance, increasing armor class!")

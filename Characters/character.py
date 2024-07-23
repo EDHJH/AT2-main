@@ -70,17 +70,20 @@ class Character:
 
     # Functions
     def choose_attack(self, target):
-        print(f"Choose an attack (Current stamina: {self.get_current_stamina()}):")
-        attack_list = list(self.get_attacks().items())
+        current_stamina = getattr(self, f"_{self.__class__.__name__}__current_stamina")
+        attacks = getattr(self, f"_{self.__class__.__name__}__attacks")
+        print(f"\nChoose an attack (Current stamina: {current_stamina}):")
+        attack_list = list(attacks.items())
         for i, (attack, info) in enumerate(attack_list):
             print(f"{i + 1}. {attack} (Stamina cost: {info['stamina_cost']})")
         chosen_attack = int(input("Enter the number of the attack: "))
         if 1 <= chosen_attack <= len(attack_list):
             attack, attack_info = attack_list[chosen_attack - 1]
-            if self.get_current_stamina() >= attack_info["stamina_cost"]:
-                self.set_current_stamina(self.get_current_stamina() - attack_info["stamina_cost"])
+            if current_stamina >= attack_info["stamina_cost"]:
+                current_stamina -= attack_info["stamina_cost"]
+                setattr(self, f"_{self.__class__.__name__}__current_stamina", current_stamina)
                 attack_method = attack_info["method"]
-                attack_method(target)
+                return attack_method(target)
             else:
                 print("Not enough stamina for this attack.")
         else:
@@ -88,19 +91,19 @@ class Character:
 
     def assign_attribute_points(self, attribute, points):
         if attribute in self.__dict__:
-            setattr(self, attribute, getattr(self, attribute) + points)
-            self.__attribute_points -= points
+            setattr(self, attribute, getattr(self, attribute) + points)  # Add points to the attribute
+            self.__attribute_points -= points  # Decrease available attribute points
         else:
             print(f"Error: Attribute '{attribute}' does not exist.")
 
     def gain_experience(self, experience):
-        self.__experience_points += experience
+        self.__experience_points += experience  # Increase character's experience points
         required_experience = self.calculate_required_experience(self.__level + 1)
         while self.__experience_points >= required_experience and self.__level < self.MAX_LEVEL:
-            self.__level += 1
-            self.__experience_points -= required_experience
-            self.__hit_points += 10
-            self.__attribute_points += self.ATTRIBUTE_POINTS_PER_LEVEL
+            self.__level += 1  # Level up the character
+            self.__experience_points -= required_experience  # Decrease character's experience points
+            self.__hit_points += 10  # Example: Increase hit points by 10 each level up
+            self.__attribute_points += self.ATTRIBUTE_POINTS_PER_LEVEL  # Allocate attribute points
             print(f"Level up! {self.__name} is now level {self.__level}.")
             required_experience = self.calculate_required_experience(self.__level + 1)
 
@@ -111,19 +114,9 @@ class Character:
         return self.__hit_points > 0
 
     def take_damage(self, amount):
-        actual_damage = max(0, amount - self.get_armor())
+        actual_damage = max(0, amount - self.__armor)
         self.__hit_points -= actual_damage
         if self.__hit_points <= 0:
-            print(f"{self.get_name()} takes {actual_damage} damage and has been defeated!")
+            print(f"{self.__name} takes {actual_damage} damage and has been defeated!")
         else:
-            print(f"{self.get_name()} takes {actual_damage} damage. Remaining hit points: {self.__hit_points}")
-
-    # Encapsulated attributes and methods for stamina
-    def get_current_stamina(self):
-        return self.__current_stamina
-
-    def set_current_stamina(self, value):
-        self.__current_stamina = value
-
-    def get_attacks(self):
-        return self.__attacks
+            print(f"{self.__name} takes {actual_damage} damage. Remaining hit points: {self.__hit_points}")

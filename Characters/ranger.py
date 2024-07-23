@@ -10,6 +10,7 @@ class Ranger(Character):
         self.__max_hp = max_hp
         self.__current_hp = max_hp
         self.__attacks = {
+            "Basic Attack": {"method": self.basic_attack, "stamina_cost": 0},
             "Arrow Shot": {"method": self.arrow_shot, "stamina_cost": 10},
             "Charged Arrow": {"method": self.charged_arrow, "stamina_cost": 20},
             "Lightning Arrow": {"method": self.lightning_arrow, "stamina_cost": 25},
@@ -50,19 +51,32 @@ class Ranger(Character):
     def regenerate_stamina(self):
         self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
 
+    def basic_attack(self, target):
+        print(f"{self.get_name()} attacks {target.get_name()} with a basic attack!")
+        damage = self.__strength
+        target.take_damage(damage)
+        return damage
+
     def arrow_shot(self, target):
         print(f"{self.get_name()} shoots an arrow at {target.get_name()}!")
-        target.take_damage(self.__strength)
+        damage = self.__strength
+        target.take_damage(damage)
+        return damage
 
     def charged_arrow(self, target):
         print(f"{self.get_name()} shoots a charged arrow at {target.get_name()}!")
-        target.take_damage(self.__strength * 1.5)
+        damage = self.__strength * 1.5
+        target.take_damage(damage)
+        return damage
 
     def lightning_arrow(self, target):
         print(f"{self.get_name()} shoots a lightning arrow at {target.get_name()}!")
-        target.take_damage(self.__strength * 2)
+        damage = self.__strength * 2
+        target.take_damage(damage)
+        return damage
 
-    def rain_of_arrows(self, targets):
-        for target in targets:
-            print(f"{self.get_name()} rains arrows down on {target.get_name()}!")
-            target.take_damage(self.__strength * 0.5)
+    def rain_of_arrows(self, target):
+        print(f"{self.get_name()} rains arrows down on {target.get_name()}!")
+        damage = self.__strength * 0.5
+        target.take_damage(damage)
+        return damage

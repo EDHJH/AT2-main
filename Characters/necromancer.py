@@ -10,6 +10,7 @@ class Necromancer(Character):
         self.__max_hp = max_hp
         self.__current_hp = max_hp
         self.__attacks = {
+            "Basic Attack": {"method": self.basic_attack, "stamina_cost": 0},
             "Reap": {"method": self.reap, "stamina_cost": 10},
             "Dark Blast": {"method": self.dark_blast, "stamina_cost": 20},
             "Soul Drain": {"method": self.soul_drain, "stamina_cost": 25},
@@ -50,28 +51,34 @@ class Necromancer(Character):
     def regenerate_stamina(self):
         self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
 
+    def basic_attack(self, target):
+        print(f"{self.get_name()} attacks {target.get_name()} with a basic attack!")
+        damage = self.__strength
+        target.take_damage(damage)
+        return damage
+
     def reap(self, target):
-        print(f"{self.get_name()} reaps the soul of {target.get_name()}!")
+        print(f"\n{self.get_name()} reaps the soul of {target.get_name()}!")
         damage = self.__strength
         target.take_damage(damage)
         self.__current_hp = min(self.__max_hp, self.__current_hp + damage * 0.3)  # Heal 30% of the damage dealt
+        return damage
 
     def dark_blast(self, target):
         print(f"{self.get_name()} unleashes a dark blast at {target.get_name()}!")
         damage = self.__strength * 1.5
         target.take_damage(damage)
+        return damage
 
     def soul_drain(self, target):
         print(f"{self.get_name()} drains the soul of {target.get_name()}!")
         damage = self.__strength * 2
         self.__current_hp = min(self.__max_hp, self.__current_hp + damage * 0.5)  # Heal half of the damage dealt
         target.take_damage(damage)
+        return damage
 
-    def plague(self, targets):
-        total_damage = 0
-        for target in targets:
-            damage = self.__strength * 0.75
-            total_damage += damage
-            print(f"{self.get_name()} spreads a plague to {target.get_name()}!")
-            target.take_damage(damage)
-        print(f"{self.get_name()} dealt a total of {total_damage} damage with plague!")
+    def plague(self, target):
+        print(f"{self.get_name()} spreads a plague to {target.get_name()}!")
+        damage = self.__strength * 0.75
+        target.take_damage(damage)
+        return damage
