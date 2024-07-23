@@ -10,55 +10,59 @@ class Necromancer(Character):
         self.__max_hp = max_hp
         self.__current_hp = max_hp
         self.__attacks = {
-            "Summon Skeleton": {"method": self.summon_skeleton, "stamina_cost": 10},
+            "Reap": {"method": self.reap, "stamina_cost": 10},
             "Dark Blast": {"method": self.dark_blast, "stamina_cost": 20},
             "Soul Drain": {"method": self.soul_drain, "stamina_cost": 25},
             "Plague": {"method": self.plague, "stamina_cost": 50}
         }
 
     # Getter Methods
-    def getMax_stamina(self):
+    def get_max_stamina(self):
         return self.__max_stamina
 
-    def getCurrent_stamina(self):
+    def get_current_stamina(self):
         return self.__current_stamina
 
-    def getStamina_regeneration(self):
+    def get_stamina_regeneration(self):
         return self.__stamina_regeneration
 
-    def getStrength(self):
+    def get_strength(self):
         return self.__strength
 
-    def getAttacks(self):
+    def get_attacks(self):
         return self.__attacks
 
-    def getMax_hp(self):
+    def get_max_hp(self):
         return self.__max_hp
 
-    def getCurrent_hp(self):
+    def get_current_hp(self):
         return self.__current_hp
+
+    def take_damage(self, amount):
+        actual_damage = max(0, amount - self.get_armor())
+        self.__current_hp -= actual_damage
+        if self.__current_hp <= 0:
+            print(f"{self.get_name()} takes {actual_damage} damage and has been defeated!")
+        else:
+            print(f"{self.get_name()} takes {actual_damage} damage. Remaining hit points: {self.__current_hp}")
 
     # Functions
     def regenerate_stamina(self):
         self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
 
-    def attack(self, target):
-        damage = self.__strength * self.getLevel()
-        target.take_damage(damage)
-        return damage
-
-    def summon_skeleton(self, target):
-        print(f"{self.getName()} summons a skeleton to attack {target.getName()}!")
+    def reap(self, target):
+        print(f"{self.get_name()} reaps the soul of {target.get_name()}!")
         damage = self.__strength
         target.take_damage(damage)
+        self.__current_hp = min(self.__max_hp, self.__current_hp + damage * 0.3)  # Heal 30% of the damage dealt
 
     def dark_blast(self, target):
-        print(f"{self.getName()} unleashes a dark blast at {target.getName()}!")
+        print(f"{self.get_name()} unleashes a dark blast at {target.get_name()}!")
         damage = self.__strength * 1.5
         target.take_damage(damage)
 
     def soul_drain(self, target):
-        print(f"{self.getName()} drains the soul of {target.getName()}!")
+        print(f"{self.get_name()} drains the soul of {target.get_name()}!")
         damage = self.__strength * 2
         self.__current_hp = min(self.__max_hp, self.__current_hp + damage * 0.5)  # Heal half of the damage dealt
         target.take_damage(damage)
@@ -68,6 +72,6 @@ class Necromancer(Character):
         for target in targets:
             damage = self.__strength * 0.75
             total_damage += damage
-            print(f"{self.getName()} spreads a plague to {target.getName()}!")
+            print(f"{self.get_name()} spreads a plague to {target.get_name()}!")
             target.take_damage(damage)
-        print(f"{self.getName()} dealt a total of {total_damage} damage with plague!")
+        print(f"{self.get_name()} dealt a total of {total_damage} damage with plague!")

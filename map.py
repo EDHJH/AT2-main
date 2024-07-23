@@ -1,25 +1,21 @@
 import random
-
 import pygame
 from assets import GAME_ASSETS
 from Enemies.enemy import Enemy
-
+from Characters.necromancer import Necromancer
+from Characters.warrior import Warrior
+from Characters.ranger import Ranger
+from turnbase import Turnbased  # Import the Turnbased class
 
 class Map:
     def __init__(self, window):
-        """
-        Initialize the Map class.
-
-        Args:
-            window (pygame.Surface): The game window surface.
-        """
         self.window = window
         self.map_image = pygame.image.load(GAME_ASSETS["dungeon_map"]).convert_alpha()
         self.map_image = pygame.transform.scale(self.map_image, (self.window.get_width(), self.window.get_height()))
         self.player_images = {
             'Warrior': pygame.image.load(GAME_ASSETS['warrior']).convert_alpha(),
-            'Mage': pygame.image.load(GAME_ASSETS['mage']).convert_alpha(),
-            'Rogue': pygame.image.load(GAME_ASSETS["rogue"]).convert_alpha()
+            'Necromancer': pygame.image.load(GAME_ASSETS["necromancer"]).convert_alpha(),
+            'Ranger': pygame.image.load(GAME_ASSETS['ranger']).convert_alpha()
         }
         self.player_type = None
         self.player_position = [self.window.get_width() / 2, self.window.get_height() / 2]
@@ -29,97 +25,77 @@ class Map:
             Enemy(GAME_ASSETS["skeleton"], [50, self.window.get_height() - 120], self.window),
             Enemy(GAME_ASSETS["skeleton"], [self.window.get_width() - 120, self.window.get_height() - 120], self.window)
         ]
-        self.in_combat = False  # Ensure this attribute is defined in the constructor
+        self.in_combat = False
         self.current_enemy = None
         self.blue_orb = None
         self.game_over = False
 
-    def load_player(self, character_type):
-        """
-        Load the player character.
+        # Create a player instance
+        self.player = None
+        self.turn_based_combat = None  # Initialize the turn-based combat system
 
-        Args:
-            character_type (str): The type of character to load.
-        """
+    def load_player(self, character_type):
         self.player_type = character_type
         self.player_image = self.player_images[character_type]
         self.player_image = pygame.transform.scale(self.player_image, (int(self.player_image.get_width() * 0.15), int(self.player_image.get_height() * 0.15)))
+        if character_type == "Necromancer":
+            self.player = Necromancer("Player", 100)  # Create a Necromancer player with 100 HP
+        elif character_type == "Warrior":
+            self.player = Warrior("Player", 150)  # Create a Warrior player with 150 HP
+        elif character_type == "Ranger":
+            self.player = Ranger("Player", 120)  # Create a Ranger player with 120 HP
 
     def check_for_combat(self):
-        """
-        Check if the player is in combat with any enemy.
-
-        Returns:
-            bool: True if the player is in combat, False otherwise.
-        """
         for enemy in self.enemies:
             if pygame.math.Vector2(enemy.position).distance_to(self.player_position) < 50:
                 self.in_combat = True
                 self.current_enemy = enemy
+                self.turn_based_combat = Turnbased(self.player, self.current_enemy)  # Initialize turn-based combat
                 return True
         return False
 
     def handle_combat(self):
-        """
-        Handle combat between the player and the current enemy.
-        """
-        if self.in_combat and self.current_enemy:
-            player_damage = random.randint(5, 10)
-            enemy_defeated = self.current_enemy.take_damage(player_damage)
-            print(f"Player attacks! Deals {player_damage} damage to the enemy.")
-            if enemy_defeated:
-                print("Enemy defeated!")
-                self.enemies.remove(self.current_enemy)
-                self.in_combat = False
-                self.current_enemy = None
-                if not self.enemies:
-                    self.spawn_blue_orb()
+        if self.in_combat and self.turn_based_combat:
+            if self.turn_based_combat.player_turn:
+                result = self.turn_based_combat.player_attack()
+                if result == 'enemy_defeated':
+                    self.enemies.remove(self.current_enemy)
+                    self.in_combat = False
+                    self.turn_based_combat = None
+                    self.current_enemy = None
+                    if not self.enemies:
+                        self.spawn_blue_orb()
             else:
-                enemy_damage = random.randint(5, 10)
-                print(f"Enemy attacks back! Deals {enemy_damage} damage to the player.")
-                # Assume player has a method to take damage
-                # self.player.take_damage(enemy_damage)
+                result = self.turn_based_combat.enemy_attack()
+                if result == 'player_defeated':
+                    self.game_over = True
 
     def spawn_blue_orb(self):
-        """
-        Spawn the blue orb in the center of the map.
-        """
         self.blue_orb = pygame.image.load(GAME_ASSETS["blue_orb"]).convert_alpha()
         self.blue_orb = pygame.transform.scale(self.blue_orb, (50, 50))
         self.orb_position = [self.window.get_width() / 2 - 25, self.window.get_height() / 2 - 25]
 
     def check_orb_collision(self):
-        """
-        Check if the player has collided with the blue orb.
-
-        Returns:
-            bool: True if the player has collided with the blue orb, False otherwise.
-        """
         if self.blue_orb and pygame.math.Vector2(self.orb_position).distance_to(self.player_position) < 25:
             self.game_over = True
-            print("YOU WIN")  # This can be modified to a more visual display if needed.
+            print("YOU WIN")
             return True
         return False
 
     def handle_events(self):
-        """
-        Handle user input events.
-        
-        Returns:
-            str: 'quit' if the game is over and should be exited, None otherwise.
-        """
         if self.game_over:
-            return 'quit'  # Stop processing events if game is over
+            return 'quit'
 
         keys = pygame.key.get_pressed()
-        move_speed = 3
-        if keys[pygame.K_a]:
+        move_speed = 5  # Set a consistent movement speed for the player
+
+        if keys[pygame.K_a] and not keys[pygame.K_d]:  # Move left if 'a' is pressed and 'd' is not pressed
             self.player_position[0] -= move_speed
-        if keys[pygame.K_d]:
+        elif keys[pygame.K_d] and not keys[pygame.K_a]:  # Move right if 'd' is pressed and 'a' is not pressed
             self.player_position[0] += move_speed
-        if keys[pygame.K_w]:
+        elif keys[pygame.K_w] and not keys[pygame.K_s]:  # Move up if 'w' is pressed and 's' is not pressed
             self.player_position[1] -= move_speed
-        if keys[pygame.K_s]:
+        elif keys[pygame.K_s] and not keys[pygame.K_w]:  # Move down if 's' is pressed and 'w' is not pressed
             self.player_position[1] += move_speed
 
         if not self.in_combat:
@@ -130,10 +106,17 @@ class Map:
         if self.blue_orb and self.check_orb_collision():
             return 'quit'
 
+    def draw_health_bar(self):
+        if self.player is None:
+            return
+        bar_width = 200
+        bar_height = 20
+        health_ratio = self.player.get_current_hp() / self.player.get_max_hp()
+        health_bar_width = int(bar_width * health_ratio)
+        pygame.draw.rect(self.window, (255, 0, 0), (10, 10, bar_width, bar_height))
+        pygame.draw.rect(self.window, (0, 255, 0), (10, 10, health_bar_width, bar_height))
+
     def draw(self):
-        """
-        Draw the game objects on the window.
-        """
         self.window.fill((0, 0, 0))
         self.window.blit(self.map_image, (0, 0))
         self.window.blit(self.player_image, (self.player_position[0], self.player_position[1]))
@@ -141,4 +124,8 @@ class Map:
             enemy.draw()
         if self.blue_orb:
             self.window.blit(self.blue_orb, self.orb_position)
+
+        # Draw health bar
+        self.draw_health_bar()
+
         pygame.display.flip()
