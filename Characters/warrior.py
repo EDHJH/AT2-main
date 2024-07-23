@@ -52,29 +52,29 @@ class Warrior(Character):
         self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
 
     def basic_attack(self, target):
-        print(f"{self.get_name()} performs a basic attack on {target.get_name()}!")
+        print(f"\n{self.get_name()} performs a basic attack on {target.get_name()}!")
         damage = self.__strength
         target.take_damage(damage)
         return damage
 
     def charge(self, target):
-        print(f"{self.get_name()} charges towards {target.get_name()}!")
+        print(f"\n{self.get_name()} charges towards {target.get_name()}!")
         damage = self.__strength
         target.take_damage(damage)
         return damage
 
     def cleave_attack(self, target):
-        print(f"{self.get_name()} cleaves {target.get_name()}!")
+        print(f"\n{self.get_name()} cleaves {target.get_name()}!")
         damage = self.__strength * 2
         target.take_damage(damage)
         return damage
 
     def shield_bash(self, target):
-        print(f"{self.get_name()} performs a shield bash on {target.get_name()}!")
+        print(f"\n{self.get_name()} performs a shield bash on {target.get_name()}!")
         damage = self.__strength + 5
         target.take_damage(damage)
         return damage
 
     def defensive_stance(self):
-        print(f"{self.get_name()} enters a defensive stance, increasing armor class!")
+        print(f"\n{self.get_name()} enters a defensive stance, increasing armor class!")
         self.set_armor_class(self.get_armor_class() + 5)

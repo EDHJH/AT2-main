@@ -58,25 +58,25 @@ class Ranger(Character):
         return damage
 
     def arrow_shot(self, target):
-        print(f"{self.get_name()} shoots an arrow at {target.get_name()}!")
+        print(f"\n{self.get_name()} shoots an arrow at {target.get_name()}!")
         damage = self.__strength
         target.take_damage(damage)
         return damage
 
     def charged_arrow(self, target):
-        print(f"{self.get_name()} shoots a charged arrow at {target.get_name()}!")
+        print(f"\n{self.get_name()} shoots a charged arrow at {target.get_name()}!")
         damage = self.__strength * 1.5
         target.take_damage(damage)
         return damage
 
     def lightning_arrow(self, target):
-        print(f"{self.get_name()} shoots a lightning arrow at {target.get_name()}!")
+        print(f"\n{self.get_name()} shoots a lightning arrow at {target.get_name()}!")
         damage = self.__strength * 2
         target.take_damage(damage)
         return damage
 
     def rain_of_arrows(self, target):
-        print(f"{self.get_name()} rains arrows down on {target.get_name()}!")
+        print(f"\n{self.get_name()} rains arrows down on {target.get_name()}!")
         damage = self.__strength * 0.5
         target.take_damage(damage)
         return damage

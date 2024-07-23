@@ -52,7 +52,7 @@ class Necromancer(Character):
         self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
 
     def basic_attack(self, target):
-        print(f"{self.get_name()} attacks {target.get_name()} with a basic attack!")
+        print(f"\n{self.get_name()} attacks {target.get_name()} with a basic attack!")
         damage = self.__strength
         target.take_damage(damage)
         return damage
@@ -65,20 +65,20 @@ class Necromancer(Character):
         return damage
 
     def dark_blast(self, target):
-        print(f"{self.get_name()} unleashes a dark blast at {target.get_name()}!")
+        print(f"\n{self.get_name()} unleashes a dark blast at {target.get_name()}!")
         damage = self.__strength * 1.5
         target.take_damage(damage)
         return damage
 
     def soul_drain(self, target):
-        print(f"{self.get_name()} drains the soul of {target.get_name()}!")
+        print(f"\n{self.get_name()} drains the soul of {target.get_name()}!")
         damage = self.__strength * 2
         self.__current_hp = min(self.__max_hp, self.__current_hp + damage * 0.5)  # Heal half of the damage dealt
         target.take_damage(damage)
         return damage
 
     def plague(self, target):
-        print(f"{self.get_name()} spreads a plague to {target.get_name()}!")
+        print(f"\n{self.get_name()} spreads a plague to {target.get_name()}!")
         damage = self.__strength * 0.75
         target.take_damage(damage)
         return damage
