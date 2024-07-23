@@ -19,7 +19,7 @@ class MainMenu:
             color = (255, 0, 0) if index == self.selected_option else (255, 255, 255)
             text = self.font.render(option, True, color)
             # Adjust the positioning of the text to be centered horizontally and slightly offset vertically
-            text_rect = text.get_rect(center=(self.window.get_width() / 2, 150 + 50 * index))
+            text_rect = text.get_rect(center=(self.window.get_width() / 2, 300 + 50 * index))
             self.window.blit(text, text_rect)
             # Store the Rect for each button
             self.button_rects.append(text_rect)

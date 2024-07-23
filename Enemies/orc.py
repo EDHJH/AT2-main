@@ -3,6 +3,7 @@ import random
 
 class Orc:
     def __init__(self, position, window):
+        # Load the orc image from the specified path
         self.image = pygame.image.load("AT2/assets/orc.png").convert_alpha()  # Ensure the image path is correct
         self.position = position  # Store the initial position of the orc
         self.window = window  # Store the window object to draw the orc on
@@ -19,31 +20,3 @@ class Orc:
     def draw(self):
         # Draw the orc on the window at its current position
         self.window.blit(self.image, self.position)
-
-def main():
-    pygame.init()
-    window = pygame.display.set_mode((800, 600))
-    pygame.display.set_caption("Orc Movement")
-
-    orc = Orc([400, 300], window)
-
-    clock = pygame.time.Clock()
-    running = True
-
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        orc.move()
-
-        window.fill((0, 0, 0))  # Clear the screen with black
-        orc.draw()
-        pygame.display.flip()  # Update the display
-
-        clock.tick(30)  # Limit the frame rate to 30 FPS
-
-    pygame.quit()
-
-if __name__ == "__main__":
-    main()
