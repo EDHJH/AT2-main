@@ -2,7 +2,7 @@ import random
 
 import pygame
 from assets import GAME_ASSETS
-from enemy import Enemy
+from Enemies.enemy import Enemy
 
 
 class Map:
@@ -112,14 +112,14 @@ class Map:
             return 'quit'  # Stop processing events if game is over
 
         keys = pygame.key.get_pressed()
-        move_speed = 2
-        if keys[pygame.K_LEFT]:
+        move_speed = 3
+        if keys[pygame.K_a]:
             self.player_position[0] -= move_speed
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_d]:
             self.player_position[0] += move_speed
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_w]:
             self.player_position[1] -= move_speed
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_s]:
             self.player_position[1] += move_speed
 
         if not self.in_combat:

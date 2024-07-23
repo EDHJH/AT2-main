@@ -8,7 +8,7 @@ class Game:
     def __init__(self):
         pygame.init()
         load_assets()  # load the game image assets
-        self.window = pygame.display.set_mode((1366, 768))
+        self.window = pygame.display.set_mode((1280, 720))
         self.menu = MainMenu(self.window)  # Create an instance of the MainMenu class
         self.character_select = CharacterSelect(self.window)  # Create an instance of the CharacterSelect class
         self.game_map = Map(self.window)  # Create an instance of the Map class
@@ -17,8 +17,14 @@ class Game:
 
     def run(self):
         while True:
+            events = pygame.event.get()
+            for event in events:  # Iterate over the events in the event queue
+                if event.type == pygame.QUIT:  # If the event type is QUIT
+                    pygame.quit()  # Quit pygame
+                    return  # Exit the run method
+
             if self.state == 'menu':  # If the state is 'menu'
-                result = self.menu.run()  # Run the menu and get the result
+                result = self.menu.handle_events(events)  # Handle events for the menu
                 if result == 'Start Game':  # If the result is 'Start Game'
                     self.state = 'character_select'  # Change the state to 'character_select'
                 elif result == 'Settings':  # If the result is 'Settings'
@@ -26,6 +32,7 @@ class Game:
                 elif result == 'Exit':  # If the result is 'Exit'
                     pygame.quit()  # Quit pygame
                     return  # Exit the run method
+                self.menu.draw()  # Draw the menu
 
             elif self.state == 'character_select':  # If the state is 'character_select'
                 selected_character = self.character_select.run()  # Run the character select screen and get the selected character
@@ -46,11 +53,6 @@ class Game:
                 else:
                     self.game_map.draw()  # Draw the game map
 
-            for event in pygame.event.get():  # Iterate over the events in the event queue
-                if event.type == pygame.QUIT:  # If the event type is QUIT
-                    pygame.quit()  # Quit pygame
-                    return  # Exit the run method
-
 if __name__ == "__main__":
     game = Game()  # Create an instance of the Game class
-    game.run()  # Run the game
+    game.run()
