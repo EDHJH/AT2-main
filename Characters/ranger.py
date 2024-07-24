@@ -80,3 +80,9 @@ class Ranger(Character):
         damage = self.__strength * 0.5
         target.take_damage(damage)
         return damage
+
+    def regenerate_stamina(self, full=False):
+        if full:
+            self.__current_stamina = self.__max_stamina  # Fully regenerate stamina
+        else:
+            self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)

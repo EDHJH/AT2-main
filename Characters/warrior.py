@@ -78,3 +78,9 @@ class Warrior(Character):
     def defensive_stance(self):
         print(f"\n{self.get_name()} enters a defensive stance, increasing armor class!")
         self.set_armor_class(self.get_armor_class() + 5)
+
+    def regenerate_stamina(self, full=False):
+        if full:
+            self.__current_stamina = self.__max_stamina  # Fully regenerate stamina
+        else:
+            self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)

@@ -5,7 +5,7 @@ class Necromancer(Character):
         super().__init__(name, "Necromancer", armor=7)
         self.__max_stamina = 100
         self.__current_stamina = self.__max_stamina
-        self.__stamina_regeneration = 10
+        self.__stamina_regeneration = 15
         self.__strength = 10
         self.__max_hp = max_hp
         self.__current_hp = max_hp
@@ -82,3 +82,10 @@ class Necromancer(Character):
         damage = self.__strength * 0.75
         target.take_damage(damage)
         return damage
+
+    def regenerate_stamina(self, full=False):
+        if full:
+            self.__current_stamina = self.__max_stamina  # Fully regenerate stamina
+        else:
+            self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
+

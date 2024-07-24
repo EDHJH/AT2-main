@@ -29,6 +29,7 @@ class Map:
         self.current_enemy = None
         self.blue_orb = None
         self.game_over = False
+        self.turn_count = 0
 
         # Create a player instance
         self.player = None
@@ -56,6 +57,10 @@ class Map:
 
     def handle_combat(self):
         if self.in_combat and self.turn_based_combat:
+            self.turn_count += 1  # Increment the turn counter
+            if self.turn_count % 2 == 0:  # Regenerate stamina every 2 turns
+                self.player.regenerate_stamina()
+
             if self.turn_based_combat.player_turn:
                 result = self.turn_based_combat.player_attack()
                 if result == 'enemy_defeated':
@@ -63,6 +68,8 @@ class Map:
                     self.in_combat = False
                     self.turn_based_combat = None
                     self.current_enemy = None
+                    self.player.regenerate_stamina(full=True)  # Fully regenerate stamina after combat
+                    self.turn_count = 0  # Reset the turn counter
                     if not self.enemies:
                         self.spawn_blue_orb()
             else:
