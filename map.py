@@ -29,7 +29,6 @@ class Map:
         self.current_enemy = None
         self.blue_orb = None
         self.game_over = False
-        self.turn_count = 0
 
         # Create a player instance
         self.player = None
@@ -51,16 +50,12 @@ class Map:
             if pygame.math.Vector2(enemy.position).distance_to(self.player_position) < 50:
                 self.in_combat = True
                 self.current_enemy = enemy
-                self.turn_based_combat = Turnbased(self.player, self.current_enemy)  # Initialize turn-based combat
+                self.turn_based_combat = Turnbased(self.player, self.current_enemy, self.window)  # Initialize turn-based combat
                 return True
         return False
 
     def handle_combat(self):
         if self.in_combat and self.turn_based_combat:
-            self.turn_count += 1  # Increment the turn counter
-            if self.turn_count % 2 == 0:  # Regenerate stamina every 2 turns
-                self.player.regenerate_stamina()
-
             if self.turn_based_combat.player_turn:
                 result = self.turn_based_combat.player_attack()
                 if result == 'enemy_defeated':
@@ -68,8 +63,6 @@ class Map:
                     self.in_combat = False
                     self.turn_based_combat = None
                     self.current_enemy = None
-                    self.player.regenerate_stamina(full=True)  # Fully regenerate stamina after combat
-                    self.turn_count = 0  # Reset the turn counter
                     if not self.enemies:
                         self.spawn_blue_orb()
             else:
@@ -125,14 +118,17 @@ class Map:
 
     def draw(self):
         self.window.fill((0, 0, 0))
-        self.window.blit(self.map_image, (0, 0))
-        self.window.blit(self.player_image, (self.player_position[0], self.player_position[1]))
-        for enemy in self.enemies:
-            enemy.draw()
-        if self.blue_orb:
-            self.window.blit(self.blue_orb, self.orb_position)
+        if self.in_combat:
+            self.turn_based_combat.draw_combat_ui()  # Draw the turn-based combat UI
+        else:
+            self.window.blit(self.map_image, (0, 0))
+            self.window.blit(self.player_image, (self.player_position[0], self.player_position[1]))
+            for enemy in self.enemies:
+                enemy.draw()
+            if self.blue_orb:
+                self.window.blit(self.blue_orb, self.orb_position)
 
-        # Draw health bar
-        self.draw_health_bar()
+            # Draw health bar
+            self.draw_health_bar()
 
-        pygame.display.flip()
+            pygame.display.flip()

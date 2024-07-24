@@ -14,6 +14,10 @@ class Character:
         self.__inventory = []  # Example empty list for character's inventory
         self.__gold = 0  # Example starting value for character's gold
         self.__attribute_points = 0  # Attribute points available to allocate
+        self.__current_hp = self.__hit_points  # Example starting current HP
+        self.__current_stamina = 100  # Example starting current stamina
+        self.__max_stamina = 100  # Example maximum stamina
+        self.__attacks = {}  # Example attacks
 
     # Getter methods
     def get_name(self):
@@ -49,6 +53,21 @@ class Character:
     def get_attribute_points(self):
         return self.__attribute_points
 
+    def get_current_hp(self):
+        return self.__current_hp
+
+    def get_current_stamina(self):
+        return self.__current_stamina
+
+    def get_max_hp(self):
+        return self.__hit_points
+
+    def get_max_stamina(self):
+        return self.__max_stamina
+
+    def get_attacks(self):
+        return self.__attacks
+
     # Setter methods
     def set_armor(self, value):
         if value >= 0:
@@ -70,24 +89,15 @@ class Character:
 
     # Functions
     def choose_attack(self, target):
-        current_stamina = getattr(self, f"_{self.__class__.__name__}__current_stamina")
-        attacks = getattr(self, f"_{self.__class__.__name__}__attacks")
-        print(f"\nChoose an attack (Current stamina: {current_stamina}):")
-        attack_list = list(attacks.items())
-        for i, (attack, info) in enumerate(attack_list):
-            print(f"{i + 1}. {attack} (Stamina cost: {info['stamina_cost']})")
-        chosen_attack = int(input("Enter the number of the attack: "))
-        if 1 <= chosen_attack <= len(attack_list):
-            attack, attack_info = attack_list[chosen_attack - 1]
-            if current_stamina >= attack_info["stamina_cost"]:
-                current_stamina -= attack_info["stamina_cost"]
-                setattr(self, f"_{self.__class__.__name__}__current_stamina", current_stamina)
+        # Just return the first attack for now as a placeholder
+        attack_list = list(self.__attacks.items())
+        if attack_list:
+            attack, attack_info = attack_list[0]
+            if self.__current_stamina >= attack_info["stamina_cost"]:
+                self.__current_stamina -= attack_info["stamina_cost"]
                 attack_method = attack_info["method"]
                 return attack_method(target)
-            else:
-                print("Not enough stamina for this attack.")
-        else:
-            print("Invalid attack.")
+        return 0
 
     def assign_attribute_points(self, attribute, points):
         if attribute in self.__dict__:
@@ -111,12 +121,12 @@ class Character:
         return int(100 * (1.5 ** (level - 1)))
 
     def is_alive(self):
-        return self.__hit_points > 0
+        return self.__current_hp > 0
 
     def take_damage(self, amount):
         actual_damage = max(0, amount - self.__armor)
-        self.__hit_points -= actual_damage
-        if self.__hit_points <= 0:
+        self.__current_hp -= actual_damage
+        if self.__current_hp <= 0:
             print(f"{self.__name} takes {actual_damage} damage and has been defeated!")
         else:
-            print(f"{self.__name} takes {actual_damage} damage. Remaining hit points: {self.__hit_points}")
+            print(f"{self.__name} takes {actual_damage} damage. Remaining hit points: {self.__current_hp}")

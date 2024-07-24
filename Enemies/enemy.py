@@ -3,6 +3,7 @@ import random
 
 class Enemy:
     def __init__(self, image_path, position, window, name="Enemy"):
+        self.image_path = image_path
         self.image = pygame.image.load(image_path).convert_alpha()
         self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * 0.75), int(self.image.get_height() * 0.75)))
         self.position = position
@@ -32,3 +33,6 @@ class Enemy:
         print(f"\n{self.get_name()} attacks {target.get_name()} and deals {damage} damage!")
         target.take_damage(damage)
         return damage
+
+    def get_image_path(self):
+        return self.image_path
