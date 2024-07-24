@@ -88,16 +88,21 @@ class Character:
             raise ValueError("Gold value must be non-negative")
 
     # Functions
-    def choose_attack(self, target):
-        # Just return the first attack for now as a placeholder
-        attack_list = list(self.__attacks.items())
-        if attack_list:
-            attack, attack_info = attack_list[0]
-            if self.__current_stamina >= attack_info["stamina_cost"]:
-                self.__current_stamina -= attack_info["stamina_cost"]
-                attack_method = attack_info["method"]
-                return attack_method(target)
-        return 0
+    def choose_attack(self, target, attack_name=None):
+        if attack_name is None:  # Basic attack
+            attack_method = self.basic_attack
+            stamina_cost = 0
+        else:  # Special attack
+            attack_method = self.__attacks[attack_name]["method"]
+            stamina_cost = self.__attacks[attack_name]["stamina_cost"]
+        
+        if self.get_current_stamina() >= stamina_cost:
+            self._current_stamina -= stamina_cost
+            return attack_method(target)
+        else:
+            print("Not enough stamina for this attack.")
+            return 0
+
 
     def assign_attribute_points(self, attribute, points):
         if attribute in self.__dict__:
