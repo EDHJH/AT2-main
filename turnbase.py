@@ -17,9 +17,11 @@ class Turnbased:
         # Load the custom font
         self.font_path = "assets/slkscre.ttf"  # Path to the TTF file
         self.font_stats = pygame.font.Font(self.font_path, 36)  # Default font for player stats
+        self.font_log = pygame.font.Font(self.font_path, 14)  # Smaller font for logs
 
         self.selected_attack = 0
         self.showing_special_attacks = False
+        self.action_log = []  # To store the logs of actions
 
         # Load player image
         self.player_image = pygame.image.load(GAME_ASSETS[f"{self.player.get_character_class().lower()}"]).convert_alpha()
@@ -59,33 +61,21 @@ class Turnbased:
         self.window.blit(self.player_image, player_pos)
         self.window.blit(self.enemy_image, enemy_pos)
 
-        # Draw player health bar above the player image
-        self.draw_health_bar(self.player, player_pos[0], player_pos[1] - 20, self.player_image.get_width(), 10)
+        # Draw player health bar on the top left corner
+        self.draw_health_bar(self.player, 10, 10, 200, 20)
 
-        # Draw enemy health bar above the enemy image
-        self.draw_health_bar(self.enemy, enemy_pos[0], enemy_pos[1] - 20, self.enemy_image.get_width(), 10)
-
-        # Draw player stats on the left half of the panel
-        self.draw_player_stats()
+        # Draw enemy health bar on the top right corner
+        self.draw_health_bar(self.enemy, self.window.get_width() - 210, 10, 200, 20)
 
         # Draw attack options on the right half of the panel
         self.draw_attack_options()
 
+        # Draw action log on the left half of the panel
+        self.draw_action_log()
+
         pygame.display.flip()
 
-    def draw_player_stats(self):
-        panel_top = self.window.get_height() - 150
-        # Draw player stats on top of the panel
-        stats_text = [
-            f"Name: {self.player.get_name()}",
-            f"Class: {self.player.get_character_class()}",
-            f"HP: {self.player.get_current_hp()}/{self.player.get_max_hp()}",
-            f"Stamina: {self.player.get_current_stamina()}/{self.player.get_max_stamina()}"
-        ]
 
-        for i, text in enumerate(stats_text):
-            rendered_text = self.font_stats.render(text, True, (255, 255, 255))
-            self.window.blit(rendered_text, (20, panel_top + 20 + i * 30))
 
     def draw_attack_options(self):
         panel_top = self.window.get_height() - 150
@@ -126,6 +116,17 @@ class Turnbased:
             self.window.blit(rendered_text, text_rect)
             self.button_rects.append((rect, option))
 
+    def draw_action_log(self):
+        panel_top = self.window.get_height() - 150
+        log_x = 20
+        log_y = panel_top + 20
+        log_height = 100
+        log_width = self.window.get_width() // 2 - 40
+
+        for i, log in enumerate(self.action_log[-3:]):  # Show last 3 actions
+            rendered_text = self.font_log.render(log, True, (255, 255, 255))
+            self.window.blit(rendered_text, (log_x, log_y + i * 30))
+
 
     def handle_events(self):
         events = pygame.event.get()
@@ -150,44 +151,57 @@ class Turnbased:
                                 return i
         return None
 
-
     def player_attack(self):
         selected_option = self.handle_events()
         if selected_option is not None:
             if selected_option == "basic_attack":
                 damage = self.player.basic_attack(self.enemy)
-                print("Player uses basic attack! Deals damage to the enemy.")
+                log = f"Player uses basic attack! Deals {damage} damage to the enemy."
+                self.action_log.append(log)
                 if self.enemy.get_hit_points() <= 0:
-                    print("Enemy defeated!")
+                    log = "Enemy defeated!"
+                    self.action_log.append(log)
+                    self.showing_special_attacks = False  # Reset to main attack options
                     return 'enemy_defeated'
                 self.player_turn = False
+                self.showing_special_attacks = False  # Reset to main attack options
                 return 'player_attacked'
             elif selected_option == "use_item":
-                print("Using item (not yet implemented).")
+                log = "Using item (not yet implemented)."
+                self.action_log.append(log)
                 # Implement item usage here
             elif selected_option == "run":
-                print("Running away (not yet implemented).")
+                log = "Running away (not yet implemented)."
+                self.action_log.append(log)
                 # Implement running away here
             else:  # Special attack
                 attack_list = list(self.player.get_attacks().keys())
                 attack_name = attack_list[selected_option]
                 damage = self.player.get_attacks()[attack_name]["method"](self.enemy)
-                print(f"Player uses {attack_name}! Deals damage to the enemy.")
+                log = f"Player uses {attack_name}! Deals {damage} damage to the enemy."
+                self.action_log.append(log)
                 if self.enemy.get_hit_points() <= 0:
-                    print("Enemy defeated!")
+                    log = "Enemy defeated!"
+                    self.action_log.append(log)
+                    self.showing_special_attacks = False  # Reset to main attack options
                     return 'enemy_defeated'
                 self.player_turn = False
+                self.showing_special_attacks = False  # Reset to main attack options
                 return 'player_attacked'
         return 'not_player_turn'
-
 
     def enemy_attack(self):
         if not self.player_turn:
             damage = self.enemy.attack(self.player)
+            log = f"Enemy attacks! Deals {damage} damage to the player."
+            self.action_log.append(log)
             if self.player.get_hit_points() <= 0:
-                print("Player defeated!")
+                log = "Player defeated!"
+                self.action_log.append(log)
+                self.showing_special_attacks = False  # Reset to main attack options
                 return 'player_defeated'
             self.player_turn = True
+            self.showing_special_attacks = False  # Reset to main attack options
             return 'enemy_attacked'
         return 'not_enemy_turn'
 

@@ -10,7 +10,6 @@ class Warrior(Character):
         self.__max_hp = max_hp
         self.__current_hp = max_hp
         self.__attacks = {
-            "Basic Attack": {"method": self.basic_attack, "stamina_cost": 0},
             "Charge": {"method": self.charge, "stamina_cost": 20},
             "Cleave Attack": {"method": self.cleave_attack, "stamina_cost": 30},
             "Shield Bash": {"method": self.shield_bash, "stamina_cost": 15},
@@ -50,12 +49,6 @@ class Warrior(Character):
     # Functions
     def regenerate_stamina(self):
         self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
-
-    def basic_attack(self, target):
-        print(f"\n{self.get_name()} performs a basic attack on {target.get_name()}!")
-        damage = self.__strength
-        target.take_damage(damage)
-        return damage
 
     def charge(self, target):
         print(f"\n{self.get_name()} charges towards {target.get_name()}!")

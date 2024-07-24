@@ -1,5 +1,5 @@
-import random
 import pygame
+import random
 from assets import GAME_ASSETS
 from Enemies.enemy import Enemy
 from Characters.necromancer import Necromancer
@@ -27,7 +27,6 @@ class Map:
         ]
         self.in_combat = False
         self.current_enemy = None
-        self.blue_orb = None
         self.game_over = False
 
         # Create a player instance
@@ -63,24 +62,10 @@ class Map:
                     self.in_combat = False
                     self.turn_based_combat = None
                     self.current_enemy = None
-                    if not self.enemies:
-                        self.spawn_blue_orb()
             else:
                 result = self.turn_based_combat.enemy_attack()
                 if result == 'player_defeated':
                     self.game_over = True
-
-    def spawn_blue_orb(self):
-        self.blue_orb = pygame.image.load(GAME_ASSETS["blue_orb"]).convert_alpha()
-        self.blue_orb = pygame.transform.scale(self.blue_orb, (50, 50))
-        self.orb_position = [self.window.get_width() / 2 - 25, self.window.get_height() / 2 - 25]
-
-    def check_orb_collision(self):
-        if self.blue_orb and pygame.math.Vector2(self.orb_position).distance_to(self.player_position) < 25:
-            self.game_over = True
-            print("YOU WIN")
-            return True
-        return False
 
     def handle_events(self):
         if self.game_over:
@@ -102,33 +87,30 @@ class Map:
             if self.check_for_combat():
                 return
         self.handle_combat()
+    
+    def draw_health_bar(self, entity, x, y, width, height):
+    # Calculate health percentage
+        health_percentage = entity.get_current_hp() / entity.get_max_hp()
 
-        if self.blue_orb and self.check_orb_collision():
-            return 'quit'
+        # Calculate the width of the health bar
+        health_bar_width = int(width * health_percentage)
 
-    def draw_health_bar(self):
-        if self.player is None:
-            return
-        bar_width = 200
-        bar_height = 20
-        health_ratio = self.player.get_current_hp() / self.player.get_max_hp()
-        health_bar_width = int(bar_width * health_ratio)
-        pygame.draw.rect(self.window, (255, 0, 0), (10, 10, bar_width, bar_height))
-        pygame.draw.rect(self.window, (0, 255, 0), (10, 10, health_bar_width, bar_height))
+        # Draw the health bar background
+        pygame.draw.rect(self.window, (255, 0, 0), (x, y, width, height))  # Red background
+
+        # Draw the current health
+        pygame.draw.rect(self.window, (0, 255, 0), (x, y, health_bar_width, height))  # Green health
+
 
     def draw(self):
         self.window.fill((0, 0, 0))
-        if self.in_combat:
-            self.turn_based_combat.draw_combat_ui()  # Draw the turn-based combat UI
-        else:
-            self.window.blit(self.map_image, (0, 0))
-            self.window.blit(self.player_image, (self.player_position[0], self.player_position[1]))
-            for enemy in self.enemies:
-                enemy.draw()
-            if self.blue_orb:
-                self.window.blit(self.blue_orb, self.orb_position)
+        self.window.blit(self.map_image, (0, 0))
+        self.window.blit(self.player_image, (self.player_position[0], self.player_position[1]))
+        for enemy in self.enemies:
+            enemy.draw()
 
-            # Draw health bar
-            self.draw_health_bar()
+        # Draw player health bar on the top left corner
+        self.draw_health_bar(self.player, 10, 10, 200, 20)
 
-            pygame.display.flip()
+        pygame.display.flip()
+

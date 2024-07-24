@@ -10,7 +10,6 @@ class Ranger(Character):
         self.__max_hp = max_hp
         self.__current_hp = max_hp
         self.__attacks = {
-            "Basic Attack": {"method": self.basic_attack, "stamina_cost": 0},
             "Arrow Shot": {"method": self.arrow_shot, "stamina_cost": 10},
             "Charged Arrow": {"method": self.charged_arrow, "stamina_cost": 20},
             "Lightning Arrow": {"method": self.lightning_arrow, "stamina_cost": 25},

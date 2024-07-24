@@ -3,56 +3,93 @@ from menu import MainMenu
 from Characters.character_select import CharacterSelect
 from map import Map
 from assets import load_assets, GAME_ASSETS
+from turnbase import Turnbased
 
 class Game:
     def __init__(self):
         pygame.init()
-        load_assets()  # load the game image assets
+        load_assets()  # Load the game image assets
         self.window = pygame.display.set_mode((1280, 720))
         self.menu = MainMenu(self.window)  # Create an instance of the MainMenu class
         self.character_select = CharacterSelect(self.window)  # Create an instance of the CharacterSelect class
         self.game_map = Map(self.window)  # Create an instance of the Map class
         self.state = 'menu'  # Set the initial state to 'menu'
         self.current_character = None  # To store the chosen character
+        self.turnbased = None  # Initialize turnbased combat placeholder
 
     def run(self):
-        while True:
+        running = True
+        while running:
             events = pygame.event.get()
-            for event in events:  # Iterate over the events in the event queue
-                if event.type == pygame.QUIT:  # If the event type is QUIT
-                    pygame.quit()  # Quit pygame
-                    return  # Exit the run method
+            for event in events:
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    running = False
+                    return
 
-            if self.state == 'menu':  # If the state is 'menu'
-                result = self.menu.handle_events(events)  # Handle events for the menu
-                if result == 'Start Game':  # If the result is 'Start Game'
-                    self.state = 'character_select'  # Change the state to 'character_select'
-                elif result == 'Settings':  # If the result is 'Settings'
-                    pass  # Settings handling would go here
-                elif result == 'Exit':  # If the result is 'Exit'
-                    pygame.quit()  # Quit pygame
-                    return  # Exit the run method
-                self.menu.draw()  # Draw the menu
+            if self.state == 'menu':
+                result = self.menu.handle_events(events)
+                if result == 'Start Game':
+                    self.state = 'character_select'
+                elif result == 'Settings':
+                    # Settings handling would go here
+                    pass
+                elif result == 'Exit':
+                    pygame.quit()
+                    running = False
+                    return
+                self.menu.draw()
 
-            elif self.state == 'character_select':  # If the state is 'character_select'
-                selected_character = self.character_select.run()  # Run the character select screen and get the selected character
-                if selected_character == 'back':  # If the selected character is 'back'
-                    self.state = 'menu'  # Change the state to 'menu'
-                elif selected_character:  # If a character is selected
-                    self.current_character = selected_character  # Set the current character to the selected character
-                    self.game_map.load_player(selected_character)  # Load the selected character into the game map
-                    self.state = 'game_map'  # Change the state to 'game_map'
+            elif self.state == 'character_select':
+                selected_character = self.character_select.run()
+                if selected_character == 'back':
+                    self.state = 'menu'
+                elif selected_character:
+                    self.current_character = selected_character
+                    self.game_map.load_player(selected_character)
+                    self.state = 'game_map'
 
-            elif self.state == 'game_map':  # If the state is 'game_map'
-                result = self.game_map.handle_events()  # Handle events in the game map and get the result
-                if result == 'back':  # If the result is 'back'
-                    self.state = 'character_select'  # Change the state to 'character_select'
-                elif result == 'quit':  # If the result is 'quit'
-                    pygame.quit()  # Quit pygame
-                    return  # Exit the run method
+            elif self.state == 'game_map':
+                result = self.game_map.handle_events()
+                if result == 'back':
+                    self.state = 'character_select'
+                elif result == 'quit':
+                    pygame.quit()
+                    running = False
+                    return
                 else:
-                    self.game_map.draw()  # Draw the game map
+                    self.game_map.draw()
+
+                # Check for combat state
+                if self.game_map.in_combat:
+                    self.state = 'combat'
+                    self.turnbased = Turnbased(self.game_map.player, self.game_map.current_enemy, self.window)
+
+            elif self.state == 'combat':
+                self.turnbased.draw_combat_ui()
+
+                if self.turnbased.player_turn:
+                    result = self.turnbased.player_attack()
+                    if result == 'enemy_defeated':
+                        print("You won the combat!")
+                        self.game_map.enemies.remove(self.game_map.current_enemy)
+                        self.game_map.in_combat = False
+                        self.state = 'game_map'
+                    elif result == 'player_attacked':
+                        continue
+                else:
+                    result = self.turnbased.enemy_attack()
+                    if result == 'player_defeated':
+                        print("You were defeated!")
+                        self.state = 'game_over'
+                    elif result == 'enemy_attacked':
+                        continue
+
+            elif self.state == 'game_over':
+                # Here you could handle game over state, such as restarting or going to a game over screen
+                print("Game over. Returning to main menu.")
+                self.state = 'menu'
 
 if __name__ == "__main__":
-    game = Game()  # Create an instance of the Game class
+    game = Game()
     game.run()
