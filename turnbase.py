@@ -73,7 +73,6 @@ class Turnbased:
 
         pygame.display.flip()
 
-
     def draw_player_stats(self):
         panel_top = self.window.get_height() - 150
         # Draw player stats on top of the panel
@@ -108,14 +107,18 @@ class Turnbased:
         start_x = self.window.get_width() // 2 + 60  # Moved more to the right
         start_y = panel_top + 20
 
+        mouse_pos = pygame.mouse.get_pos()  # Get current mouse position
+
         for i, option in enumerate(options):
-            color = (255, 255, 255)  # White color for text
-            if i in [1, 3]:  # Special Attacks and Run buttons
-                rect_x = start_x + (i % 2) * (button_width + padding_x + 50)  # Move more to the right
-            else:  # Attack and Use Items buttons
-                rect_x = start_x + (i % 2) * (button_width + padding_x)
+            rect_x = start_x + (i % 2) * (button_width + padding_x + (50 if i in [1, 3] else 0))  # Adjust x position for Special Attacks and Run buttons
             rect_y = start_y + (i // 2) * (button_height + padding_y)
             rect = pygame.Rect(rect_x, rect_y, button_width, button_height)
+            
+            if rect.collidepoint(mouse_pos):
+                color = (0, 0, 255)  # Blue color when hovered
+            else:
+                color = (255, 255, 255)  # White color
+
             pygame.draw.rect(self.window, color, rect, 2)  # Draw button rectangle
             font = self.find_font_size(option, button_width - 10, button_height - 10)  # Adjust font size to fit
             rendered_text = font.render(option, True, color)
@@ -123,31 +126,11 @@ class Turnbased:
             self.window.blit(rendered_text, text_rect)
             self.button_rects.append((rect, option))
 
-    def handle_events(self, events):
+
+    def handle_events(self):
+        events = pygame.event.get()
         for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    self.selected_attack = (self.selected_attack - 2) % (4 if not self.showing_special_attacks else len(self.player.get_attacks()))
-                elif event.key == pygame.K_DOWN:
-                    self.selected_attack = (self.selected_attack + 2) % (4 if not self.showing_special_attacks else len(self.player.get_attacks()))
-                elif event.key == pygame.K_LEFT:
-                    self.selected_attack = (self.selected_attack - 1) % (4 if not self.showing_special_attacks else len(self.player.get_attacks()))
-                elif event.key == pygame.K_RIGHT:
-                    self.selected_attack = (self.selected_attack + 1) % (4 if not self.showing_special_attacks else len(self.player.get_attacks()))
-                elif event.key == pygame.K_RETURN:
-                    if not self.showing_special_attacks:
-                        if self.selected_attack == 0:
-                            return "basic_attack"
-                        elif self.selected_attack == 1:
-                            self.showing_special_attacks = True
-                            self.selected_attack = 0
-                        elif self.selected_attack == 2:
-                            return "use_item"
-                        elif self.selected_attack == 3:
-                            return "run"
-                    else:
-                        return self.selected_attack
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button click
                     mouse_pos = event.pos
                     for i, (rect, option) in enumerate(self.button_rects):
@@ -169,10 +152,10 @@ class Turnbased:
 
 
     def player_attack(self):
-        selected_option = self.handle_events(pygame.event.get())
+        selected_option = self.handle_events()
         if selected_option is not None:
             if selected_option == "basic_attack":
-                damage = self.player.choose_attack(self.enemy)
+                damage = self.player.basic_attack(self.enemy)
                 print("Player uses basic attack! Deals damage to the enemy.")
                 if self.enemy.get_hit_points() <= 0:
                     print("Enemy defeated!")
@@ -188,7 +171,7 @@ class Turnbased:
             else:  # Special attack
                 attack_list = list(self.player.get_attacks().keys())
                 attack_name = attack_list[selected_option]
-                damage = self.player.choose_attack(self.enemy, attack_name)
+                damage = self.player.get_attacks()[attack_name]["method"](self.enemy)
                 print(f"Player uses {attack_name}! Deals damage to the enemy.")
                 if self.enemy.get_hit_points() <= 0:
                     print("Enemy defeated!")
