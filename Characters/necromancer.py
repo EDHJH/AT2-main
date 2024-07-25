@@ -49,7 +49,13 @@ class Necromancer(Character):
     # Functions
     def regenerate_stamina(self):
         self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
-
+    
+    def basic_attack(self, target):
+        print(f"{self.get_name()} attacks {target.get_name()} with a basic attack!")
+        damage = self.__strength
+        target.take_damage(damage)
+        return damage
+    
     def basic_attack(self, target):
         print(f"\n{self.get_name()} attacks {target.get_name()} with a basic attack!")
         damage = self.__strength
