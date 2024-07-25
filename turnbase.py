@@ -1,4 +1,4 @@
-import pygame
+import pygame, random
 from assets import GAME_ASSETS
 
 class Turnbased:
@@ -171,9 +171,17 @@ class Turnbased:
                 self.action_log.append(log)
                 # Implement item usage here
             elif selected_option == "run":
-                log = "Running away (not yet implemented)."
-                self.action_log.append(log)
-                # Implement running away here
+                run_successful = random.randint(0, 10) > 5
+                if run_successful:
+                    log = "Run successful! Exiting combat."
+                    self.action_log.append(log)
+                    self.showing_special_attacks = False  # Reset to main attack options
+                    return 'run_successful'
+                else:
+                    log = "Run failed! Enemy attacks."
+                    self.action_log.append(log)
+                    self.player_turn = False
+                    return 'run_failed'
             else:  # Special attack
                 attack_list = list(self.player.get_attacks().keys())
                 attack_name = attack_list[selected_option]

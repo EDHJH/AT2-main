@@ -1,5 +1,4 @@
-import pygame
-import random
+import pygame, random, time
 from assets import GAME_ASSETS
 from Enemies.enemy import Enemy
 from Characters.necromancer import Necromancer
@@ -33,6 +32,10 @@ class Map:
         self.player = None
         self.turn_based_combat = None  # Initialize the turn-based combat system
 
+        # Run Time
+        self.last_run_time = 0  # Track the time when the character last ran from combat
+        self.run_cooldown = 2  # Cooldown period in seconds
+
     def load_player(self, character_type):
         self.player_type = character_type
         self.player_image = self.player_images[character_type]
@@ -45,13 +48,17 @@ class Map:
             self.player = Ranger("Player", 120)  # Create a Ranger player with 120 HP
 
     def check_for_combat(self):
+        current_time = time.time()
+        if current_time - self.last_run_time < self.run_cooldown:
+            return False  # Skip combat if within cooldown period
+
         for enemy in self.enemies:
             if pygame.math.Vector2(enemy.position).distance_to(self.player_position) < 50:
                 self.in_combat = True
                 self.current_enemy = enemy
-                self.turn_based_combat = Turnbased(self.player, self.current_enemy, self.window)  # Initialize turn-based combat
                 return True
         return False
+
 
     def handle_combat(self):
         if self.in_combat and self.turn_based_combat:

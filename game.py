@@ -1,4 +1,4 @@
-import pygame
+import pygame, time
 from menu import MainMenu
 from Characters.character_select import CharacterSelect
 from map import Map
@@ -76,6 +76,13 @@ class Game:
                         self.game_map.in_combat = False
                         self.state = 'game_map'
                     elif result == 'player_attacked':
+                        continue
+                    elif result == 'run_successful':
+                        print("You successfully ran away!")
+                        self.game_map.last_run_time = time.time()  # Set the last run time
+                        self.game_map.in_combat = False
+                        self.state = 'game_map'
+                    elif result == 'run_failed':
                         continue
                 else:
                     result = self.turnbased.enemy_attack()
