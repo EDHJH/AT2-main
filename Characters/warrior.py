@@ -2,10 +2,10 @@ from Characters.character import Character
 
 class Warrior(Character):
     def __init__(self, name, max_hp):
-        super().__init__(name, "Warrior", armor=9)
+        super().__init__(name, "Warrior", armor=8)
         self.__max_stamina = 100
         self.__current_stamina = self.__max_stamina
-        self.__stamina_regeneration = 10
+        self.__stamina_regeneration = 5
         self.__strength = 15
         self.__max_hp = max_hp
         self.__current_hp = max_hp
@@ -79,6 +79,9 @@ class Warrior(Character):
         damage = self.__strength *3
         target.take_damage(damage)
         return damage
+
+    def consume_stamina(self, amount):
+        self.__current_stamina = max(0, self.__current_stamina - amount)
 
     def regenerate_stamina(self, full=False):
         if full:

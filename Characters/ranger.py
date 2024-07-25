@@ -6,11 +6,11 @@ class Ranger(Character):
         self.__max_stamina = 100
         self.__current_stamina = self.__max_stamina
         self.__stamina_regeneration = 10
-        self.__strength = 10
+        self.__strength = 15
         self.__max_hp = max_hp
         self.__current_hp = max_hp
         self.__attacks = {
-            "Arrow Shot": {"method": self.arrow_shot, "stamina_cost": 10},
+            "Arrow Shot": {"method": self.arrow_shot, "stamina_cost": 15},
             "Charged Arrow": {"method": self.charged_arrow, "stamina_cost": 20},
             "Lightning Arrow": {"method": self.lightning_arrow, "stamina_cost": 25},
             "Rain of Arrows": {"method": self.rain_of_arrows, "stamina_cost": 50}
@@ -79,6 +79,9 @@ class Ranger(Character):
         damage = self.__strength * 0.5
         target.take_damage(damage)
         return damage
+
+    def consume_stamina(self, amount):
+        self.__current_stamina = max(0, self.__current_stamina - amount)
 
     def regenerate_stamina(self, full=False):
         if full:

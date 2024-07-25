@@ -2,7 +2,7 @@ from Characters.character import Character
 
 class Necromancer(Character):
     def __init__(self, name, max_hp):
-        super().__init__(name, "Necromancer", armor=8)
+        super().__init__(name, "Necromancer", armor=7)
         self.__max_stamina = 150
         self.__current_stamina = self.__max_stamina
         self.__stamina_regeneration = 15
@@ -10,7 +10,7 @@ class Necromancer(Character):
         self.__max_hp = max_hp
         self.__current_hp = max_hp
         self.__attacks = {
-            "Reap": {"method": self.reap, "stamina_cost": 10},
+            "Reap": {"method": self.reap, "stamina_cost": 20},
             "Dark Blast": {"method": self.dark_blast, "stamina_cost": 20},
             "Soul Drain": {"method": self.soul_drain, "stamina_cost": 25},
             "Plague": {"method": self.plague, "stamina_cost": 50}
@@ -87,6 +87,9 @@ class Necromancer(Character):
         damage = self.__strength * 0.75
         target.take_damage(damage)
         return damage
+
+    def consume_stamina(self, amount):
+        self.__current_stamina = max(0, self.__current_stamina - amount)
 
     def regenerate_stamina(self, full=False):
         if full:

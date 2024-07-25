@@ -62,7 +62,6 @@ class Map:
                 return True
         return False
 
-
     def handle_combat(self):
         if self.in_combat and self.turn_based_combat:
             if self.turn_based_combat.player_turn:
@@ -72,6 +71,8 @@ class Map:
                     self.in_combat = False
                     self.turn_based_combat = None
                     self.current_enemy = None
+                    if not self.enemies:
+                        self.spawn_blue_orb()
             else:
                 result = self.turn_based_combat.enemy_attack()
                 if result == 'player_defeated':
@@ -84,20 +85,20 @@ class Map:
         keys = pygame.key.get_pressed()
         move_speed = 5  # Set a consistent movement speed for the player
 
-        if keys[pygame.K_a] and not keys[pygame.K_d]:  # Move left if 'a' is pressed and 'd' is not pressed
+        if keys[pygame.K_a] and self.player_position[0] > 0:  # Move left if 'a' is pressed and within boundary
             self.player_position[0] -= move_speed
-        elif keys[pygame.K_d] and not keys[pygame.K_a]:  # Move right if 'd' is pressed and 'a' is not pressed
+        if keys[pygame.K_d] and self.player_position[0] < self.window.get_width() - self.player_image.get_width():  # Move right if 'd' is pressed and within boundary
             self.player_position[0] += move_speed
-        elif keys[pygame.K_w] and not keys[pygame.K_s]:  # Move up if 'w' is pressed and 's' is not pressed
+        if keys[pygame.K_w] and self.player_position[1] > 0:  # Move up if 'w' is pressed and within boundary
             self.player_position[1] -= move_speed
-        elif keys[pygame.K_s] and not keys[pygame.K_w]:  # Move down if 's' is pressed and 'w' is not pressed
+        if keys[pygame.K_s] and self.player_position[1] < self.window.get_height() - self.player_image.get_height():  # Move down if 's' is pressed and within boundary
             self.player_position[1] += move_speed
 
         if not self.in_combat:
             if self.check_for_combat():
                 return
         self.handle_combat()
-    
+
     def draw_health_bar(self, entity, x, y, width, height):
         # Calculate health percentage
         health_percentage = entity.get_current_hp() / entity.get_max_hp()
@@ -121,16 +122,45 @@ class Map:
         text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
         self.window.blit(text_surface, text_rect)
 
+    def draw_stamina_bar(self, entity, x, y, width, height):
+        # Calculate stamina percentage
+        stamina_percentage = entity.get_current_stamina() / entity.get_max_stamina()
+
+        # Calculate the width of the stamina bar
+        stamina_bar_width = int(width * stamina_percentage)
+
+        # Draw the stamina bar background (gray for missing stamina)
+        pygame.draw.rect(self.window, (169, 169, 169), (x, y, width, height))  # Gray background
+
+        # Draw the current stamina (blue)
+        pygame.draw.rect(self.window, (0, 0, 255), (x, y, stamina_bar_width, height))  # Blue stamina
+
+        # Draw black border around the stamina bar
+        pygame.draw.rect(self.window, (0, 0, 0), (x, y, width, height), 2)  # Black border
+
+        # Draw current stamina as black numbers inside the bar
+        stamina_text = f"{entity.get_current_stamina()}/{entity.get_max_stamina()}"
+        font = pygame.font.Font(self.font_path, 20)  # Use the same font path and size as turn-based combat
+        text_surface = font.render(stamina_text, True, (0, 0, 0))
+        text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
+        self.window.blit(text_surface, text_rect)
+
+
+
     def draw(self):
         self.window.fill((0, 0, 0))
         self.window.blit(self.map_image, (0, 0))
         self.window.blit(self.player_image, (self.player_position[0], self.player_position[1]))
         for enemy in self.enemies:
             enemy.draw()
-        
+
         # Draw player health bar on the top left corner
         self.draw_health_bar(self.player, 10, 10, 200, 20)
+        
+        # Draw player stamina bar below the health bar
+        self.draw_stamina_bar(self.player, 10, 40, 200, 20)
 
         pygame.display.flip()
+
 
 

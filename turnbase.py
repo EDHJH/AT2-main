@@ -7,6 +7,7 @@ class Turnbased:
         self.enemy = enemy
         self.window = window
         self.player_turn = True
+        self.round_counter = 0  # Initialize round counter
         self.turn_background_image = pygame.image.load(GAME_ASSETS["lv1_turn_background"]).convert()
         self.turn_background_image = pygame.transform.scale(self.turn_background_image, (self.window.get_width(), self.window.get_height()))
         self.panel_image = pygame.image.load(GAME_ASSETS["panel"]).convert_alpha()
@@ -55,6 +56,29 @@ class Turnbased:
         text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
         self.window.blit(text_surface, text_rect)
 
+    def draw_stamina_bar(self, entity, x, y, width, height):
+        # Calculate stamina percentage
+        stamina_percentage = entity.get_current_stamina() / entity.get_max_stamina()
+
+        # Calculate the width of the stamina bar
+        stamina_bar_width = int(width * stamina_percentage)
+
+        # Draw the stamina bar background (gray for missing stamina)
+        pygame.draw.rect(self.window, (169, 169, 169), (x, y, width, height))  # Gray background
+
+        # Draw the current stamina (blue)
+        pygame.draw.rect(self.window, (0, 0, 255), (x, y, stamina_bar_width, height))  # Blue stamina
+
+        # Draw black border around the stamina bar
+        pygame.draw.rect(self.window, (0, 0, 0), (x, y, width, height), 2)  # Black border
+
+        # Draw current stamina as black numbers inside the bar
+        stamina_text = f"{entity.get_current_stamina()}/{entity.get_max_stamina()}"
+        font = pygame.font.Font(self.font_path, 20)  # Use the same font path and size as turn-based combat
+        text_surface = font.render(stamina_text, True, (0, 0, 0))
+        text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
+        self.window.blit(text_surface, text_rect)
+
 
     def draw_combat_ui(self):
         self.window.blit(self.turn_background_image, (0, 0))
@@ -72,19 +96,23 @@ class Turnbased:
         self.window.blit(self.player_image, player_pos)
         self.window.blit(self.enemy_image, enemy_pos)
 
-        # Draw player health bar on the top left corner
+        # Draw player health bar in the top left corner
         self.draw_health_bar(self.player, 10, 10, 200, 20)
+        
+        # Draw player stamina bar below the health bar
+        self.draw_stamina_bar(self.player, 10, 40, 200, 20)
 
-        # Draw enemy health bar on the top right corner
+        # Draw enemy health bar in the top right corner
         self.draw_health_bar(self.enemy, self.window.get_width() - 210, 10, 200, 20)
 
-        # Draw attack options on the right half of the panel
+        # Draw attack options on the panel
         self.draw_attack_options()
 
-        # Draw action log on the left half of the panel
+        # Draw battle log on the left side of the panel
         self.draw_action_log()
 
         pygame.display.flip()
+
 
     def draw_attack_options(self):
         panel_top = self.window.get_height() - 150
@@ -136,6 +164,11 @@ class Turnbased:
             rendered_text = self.font_log.render(log, True, (255, 255, 255))
             self.window.blit(rendered_text, (log_x, log_y + i * 30))
 
+    def regenerate_stamina(self):
+        self.player.regenerate_stamina()
+        log = f"Player regenerates {self.player.get_stamina_regeneration()} stamina."
+        self.action_log.append(log)
+
 
     def handle_events(self):
         events = pygame.event.get()
@@ -171,9 +204,13 @@ class Turnbased:
                     log = "Enemy defeated!"
                     self.action_log.append(log)
                     self.showing_special_attacks = False  # Reset to main attack options
+                    self.round_counter = 0  # Reset round counter
                     return 'enemy_defeated'
                 self.player_turn = False
                 self.showing_special_attacks = False  # Reset to main attack options
+                self.round_counter += 1
+                if self.round_counter % 2 == 0:
+                    self.regenerate_stamina()
                 return 'player_attacked'
             elif selected_option == "use_item":
                 log = "Using item (not yet implemented)."
@@ -185,26 +222,40 @@ class Turnbased:
                     log = "Run successful! Exiting combat."
                     self.action_log.append(log)
                     self.showing_special_attacks = False  # Reset to main attack options
+                    self.round_counter = 0  # Reset round counter
                     return 'run_successful'
                 else:
                     log = "Run failed! Enemy attacks."
                     self.action_log.append(log)
                     self.player_turn = False
+                    self.round_counter += 1
+                    if self.round_counter % 2 == 0:
+                        self.regenerate_stamina()
                     return 'run_failed'
             else:  # Special attack
                 attack_list = list(self.player.get_attacks().keys())
                 attack_name = attack_list[selected_option]
-                damage = self.player.get_attacks()[attack_name]["method"](self.enemy)
-                log = f"Player uses {attack_name}! Deals {damage} damage to the enemy."
-                self.action_log.append(log)
-                if self.enemy.get_hit_points() <= 0:
-                    log = "Enemy defeated!"
+                attack_info = self.player.get_attacks()[attack_name]
+                if self.player.get_current_stamina() >= attack_info["stamina_cost"]:
+                    damage = attack_info["method"](self.enemy)
+                    self.player.consume_stamina(attack_info["stamina_cost"])
+                    log = f"Player uses {attack_name}! Deals {damage} damage to the enemy."
                     self.action_log.append(log)
+                    if self.enemy.get_hit_points() <= 0:
+                        log = "Enemy defeated!"
+                        self.action_log.append(log)
+                        self.showing_special_attacks = False  # Reset to main attack options
+                        self.round_counter = 0  # Reset round counter
+                        return 'enemy_defeated'
+                    self.player_turn = False
                     self.showing_special_attacks = False  # Reset to main attack options
-                    return 'enemy_defeated'
-                self.player_turn = False
-                self.showing_special_attacks = False  # Reset to main attack options
-                return 'player_attacked'
+                    self.round_counter += 1
+                    if self.round_counter % 2 == 0:
+                        self.regenerate_stamina()
+                    return 'player_attacked'
+                else:
+                    log = f"Not enough stamina to use {attack_name}!"
+                    self.action_log.append(log)
         return 'not_player_turn'
 
     def enemy_attack(self):
@@ -219,6 +270,9 @@ class Turnbased:
                 return 'player_defeated'
             self.player_turn = True
             self.showing_special_attacks = False  # Reset to main attack options
+            self.round_counter += 1
+            if self.round_counter % 2 == 0:
+                self.regenerate_stamina()
             return 'enemy_attacked'
         return 'not_enemy_turn'
 
