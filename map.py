@@ -30,6 +30,7 @@ class Map:
 
         # Font
         self.font_path = "assets/slkscre.ttf"
+        self.font = pygame.font.Font(self.font_path, 20)
 
         # Create a player instance
         self.player = None
@@ -38,6 +39,14 @@ class Map:
         # Run Time
         self.last_run_time = 0  # Track the time when the character last ran from combat
         self.run_cooldown = 2  # Cooldown period in seconds
+
+        # Stats button
+        self.stats_button_rect = pygame.Rect(self.window.get_width() // 2 - 50, 10, 100, 50)
+        self.show_stats = False
+        self.last_stats_toggle = 0  # To handle the toggle delay
+        self.stats_toggle_delay = 0.2  # 200 milliseconds delay
+
+
 
     def load_player(self, character_type):
         self.player_type = character_type
@@ -85,19 +94,39 @@ class Map:
         keys = pygame.key.get_pressed()
         move_speed = 5  # Set a consistent movement speed for the player
 
-        if keys[pygame.K_a] and self.player_position[0] > 0:  # Move left if 'a' is pressed and within boundary
-            self.player_position[0] -= move_speed
-        if keys[pygame.K_d] and self.player_position[0] < self.window.get_width() - self.player_image.get_width():  # Move right if 'd' is pressed and within boundary
-            self.player_position[0] += move_speed
-        if keys[pygame.K_w] and self.player_position[1] > 0:  # Move up if 'w' is pressed and within boundary
-            self.player_position[1] -= move_speed
-        if keys[pygame.K_s] and self.player_position[1] < self.window.get_height() - self.player_image.get_height():  # Move down if 's' is pressed and within boundary
-            self.player_position[1] += move_speed
+        current_time = time.time()
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return 'quit'
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button
+                    mouse_pos = pygame.mouse.get_pos()
+                    if self.stats_button_rect.collidepoint(mouse_pos) and current_time - self.last_stats_toggle > self.stats_toggle_delay:
+                        self.show_stats = not self.show_stats  # Toggle stats display
+                        self.last_stats_toggle = current_time
+
+        if not self.in_combat:
+            # Movement
+            if keys[pygame.K_a] and self.player_position[0] > 0:  # Move left if 'a' is pressed and within boundary
+                self.player_position[0] -= move_speed
+            if keys[pygame.K_d] and self.player_position[0] < self.window.get_width() - self.player_image.get_width():  # Move right if 'd' is pressed and within boundary
+                self.player_position[0] += move_speed
+            if keys[pygame.K_w] and self.player_position[1] > 0:  # Move up if 'w' is pressed and within boundary
+                self.player_position[1] -= move_speed
+            if keys[pygame.K_s] and self.player_position[1] < self.window.get_height() - self.player_image.get_height():  # Move down if 's' is pressed and within boundary
+                self.player_position[1] += move_speed
+            # Stats
+            if keys[pygame.K_e] and current_time - self.last_stats_toggle > self.stats_toggle_delay:  # Press 'e' to toggle stats
+                self.show_stats = not self.show_stats  # Toggle stats display
+                self.last_stats_toggle = current_time
 
         if not self.in_combat:
             if self.check_for_combat():
                 return
         self.handle_combat()
+        self.draw()
+
 
     def draw_health_bar(self, entity, x, y, width, height):
         # Calculate health percentage
@@ -145,6 +174,44 @@ class Map:
         text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
         self.window.blit(text_surface, text_rect)
 
+    def draw_stats_screen(self):
+        # Background rectangle
+        stats_rect = pygame.Rect(self.window.get_width() // 2 - 250, self.window.get_height() // 2 - 150, 500, 300)
+        stats_surface = pygame.Surface(stats_rect.size, pygame.SRCALPHA)
+        stats_surface.fill((0, 0, 0, 128))  # Half-transparent black
+        self.window.blit(stats_surface, stats_rect.topleft)
+
+        # White border around the stats screen
+        pygame.draw.rect(self.window, (255, 255, 255), stats_rect, 2)
+
+        font = pygame.font.Font(self.font_path, 24)
+
+        stats_texts = [
+            f"Health: {self.player.get_current_hp()}",
+            f"Strength: {self.player.get_strength()}",
+            f"Stamina: {self.player.get_current_stamina()}",
+            f"Defense: {self.player.get_armor()}"
+        ]
+
+        y_offset = stats_rect.top + 10
+        for text in stats_texts:
+            text_surface = font.render(text, True, (255, 255, 255))
+            self.window.blit(text_surface, (stats_rect.left + 10, y_offset))
+            y_offset += 30
+
+        # Space between stats and special attacks
+        y_offset += 10
+
+        # Special attacks title
+        special_attacks_title = font.render("Special Attacks:", True, (255, 255, 255))
+        self.window.blit(special_attacks_title, (stats_rect.left + 10, y_offset))
+        y_offset += 30
+
+        # Special attacks with their stamina costs
+        for attack, info in self.player.get_attacks().items():
+            text_surface = font.render(f"{attack}: {info['stamina_cost']} stamina", True, (255, 255, 255))
+            self.window.blit(text_surface, (stats_rect.left + 10, y_offset))
+            y_offset += 30
 
 
     def draw(self):
@@ -160,7 +227,18 @@ class Map:
         # Draw player stamina bar below the health bar
         self.draw_stamina_bar(self.player, 10, 40, 200, 20)
 
+        # Draw stats button
+        mouse_pos = pygame.mouse.get_pos()
+        font = pygame.font.Font(self.font_path, 24)
+        if self.stats_button_rect.collidepoint(mouse_pos):
+            text_surface = font.render("Stats (e)", True, (0, 0, 255))  # Blue text when hovered
+        else:
+            text_surface = font.render("Stats (e)", True, (255, 255, 255))  # White text
+
+        text_rect = text_surface.get_rect(center=self.stats_button_rect.center)
+        self.window.blit(text_surface, text_rect)
+
+        if self.show_stats:
+            self.draw_stats_screen()
+
         pygame.display.flip()
-
-
-

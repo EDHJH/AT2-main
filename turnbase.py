@@ -176,7 +176,6 @@ class Turnbased:
             self.window.blit(rendered_text, text_rect)
             self.button_rects.append((rect, option))
 
-
     def draw_action_log(self):
         panel_top = self.window.get_height() - 150
         log_x = 20
@@ -232,8 +231,6 @@ class Turnbased:
                             else:
                                 return i  # Return the index for special attacks
         return None
-
-
 
     def player_attack(self):
         selected_option = self.handle_events()
@@ -364,11 +361,6 @@ class Turnbased:
                             if rect.collidepoint(mouse_pos) and option == "Quit":
                                 pygame.quit()
                                 exit()
-
-
-
-
-
 
     def find_font_size(self, text, max_width, max_height):
         font_size = 36

@@ -1,23 +1,25 @@
 import pygame, random
-from Enemies.enemy import Enemy
+from Enemies.enemy import Enemy  # Import the base Enemy class
 
-class Lv1Boss(Enemy):
-    def __init__(self, position, window):
-        super().__init__('AT2/assets/lv1_boss.png', position, window, name="Lv1Boss")
-        self.max_health = 300  # Boss has more health
-        self.health = self.max_health
-        self.attack_damage = 20  # Boss deals more damage
+class lv1_Boss:
+    def __init__(self, image_path, position, window):
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.position = position
+        self.window = window
+        self.health = 500  # Boss health, adjust as needed
+
+    def draw(self, window):
+        window.blit(self.image, self.position)
 
     def take_damage(self, damage):
         self.health -= damage
         if self.health <= 0:
-            print(f"{self.name} has been defeated!")
-            return True
-        return False
+            self.health = 0
+
+    def is_defeated(self):
+        return self.health <= 0
 
     def attack(self, target):
-        damage = random.randint(self.attack_damage - 5, self.attack_damage + 5)  # Boss has a higher damage range
-        print(f"\n{self.name} attacks {target.get_name()} and deals {damage} damage!")
+        damage = random.randint(10, 20)  # Boss damage range
         target.take_damage(damage)
         return damage
-

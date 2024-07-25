@@ -95,6 +95,8 @@ class Game:
             elif self.state == 'game_over':
                 self.turnbased.display_dead_screen()
 
+            pygame.display.update()
+
 
 if __name__ == "__main__":
     game = Game()
