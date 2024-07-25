@@ -2,7 +2,7 @@ from Characters.character import Character
 
 class Warrior(Character):
     def __init__(self, name, max_hp):
-        super().__init__(name, "Warrior", armor=10)
+        super().__init__(name, "Warrior", armor=9)
         self.__max_stamina = 100
         self.__current_stamina = self.__max_stamina
         self.__stamina_regeneration = 10

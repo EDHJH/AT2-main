@@ -2,7 +2,7 @@ from Characters.character import Character
 
 class Necromancer(Character):
     def __init__(self, name, max_hp):
-        super().__init__(name, "Necromancer", armor=7)
+        super().__init__(name, "Necromancer", armor=8)
         self.__max_stamina = 150
         self.__current_stamina = self.__max_stamina
         self.__stamina_regeneration = 15

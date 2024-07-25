@@ -2,7 +2,7 @@ from Characters.character import Character
 
 class Ranger(Character):
     def __init__(self, name, max_hp):
-        super().__init__(name, "Ranger", armor=7)
+        super().__init__(name, "Ranger", armor=8)
         self.__max_stamina = 100
         self.__current_stamina = self.__max_stamina
         self.__stamina_regeneration = 10
