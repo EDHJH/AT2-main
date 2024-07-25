@@ -38,6 +38,10 @@ class Turnbased:
         self.enemy_image = pygame.image.load(enemy_image_path).convert_alpha()
         self.enemy_image = pygame.transform.scale(self.enemy_image, (int(self.enemy_image.get_width() * 0.75), int(self.enemy_image.get_height() * 0.75)))
 
+        # Dead Screen
+        self.dead_screen_image = pygame.image.load(GAME_ASSETS["dead_screen"]).convert_alpha()
+        self.dead_screen_image = pygame.transform.scale(self.dead_screen_image, (self.window.get_width(), self.window.get_height()))
+
     def draw_health_bar(self, entity, x, y, width, height):
     # Calculate health percentage
         health_percentage = entity.get_current_hp() / entity.get_max_hp()
@@ -277,7 +281,6 @@ class Turnbased:
                     try:
                         selected_option = int(selected_option)
                     except ValueError:
-                       
                         return 'not_player_turn'
                 
                 attack_name = attack_list[selected_option]
@@ -302,6 +305,8 @@ class Turnbased:
                 else:
                     log = f"Not enough stamina to use {attack_name}!"
                     self.action_log.append(log)
+        if self.player.get_current_hp() <= 0:
+            self.display_dead_screen()
         return 'not_player_turn'
 
 
@@ -316,6 +321,7 @@ class Turnbased:
                 log = "Player defeated!"
                 self.action_log.append(log)
                 self.showing_special_attacks = False  # Reset to main attack options
+                self.display_dead_screen()  # Display the dead screen
                 return 'player_defeated'
             self.player_turn = True
             self.showing_special_attacks = False  # Reset to main attack options
@@ -324,6 +330,17 @@ class Turnbased:
                 self.regenerate_stamina()
             return 'enemy_attacked'
         return 'not_enemy_turn'
+
+
+    def display_dead_screen(self):
+        self.window.blit(self.dead_screen_image, (0, 0))
+        pygame.display.flip()
+        pygame.time.delay(3000)  # Display the dead screen for 3 seconds
+        pygame.quit()
+        exit()  # Exit the game
+
+
+
 
     def find_font_size(self, text, max_width, max_height):
         font_size = 36
