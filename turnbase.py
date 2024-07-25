@@ -33,17 +33,28 @@ class Turnbased:
         self.enemy_image = pygame.transform.scale(self.enemy_image, (int(self.enemy_image.get_width() * 0.75), int(self.enemy_image.get_height() * 0.75)))
 
     def draw_health_bar(self, entity, x, y, width, height):
-        # Calculate health percentage
+    # Calculate health percentage
         health_percentage = entity.get_current_hp() / entity.get_max_hp()
 
         # Calculate the width of the health bar
         health_bar_width = int(width * health_percentage)
 
-        # Draw the health bar background
+        # Draw the health bar background (red for missing health)
         pygame.draw.rect(self.window, (255, 0, 0), (x, y, width, height))  # Red background
 
-        # Draw the current health
+        # Draw the current health (green)
         pygame.draw.rect(self.window, (0, 255, 0), (x, y, health_bar_width, height))  # Green health
+
+        # Draw black border around the health bar
+        pygame.draw.rect(self.window, (0, 0, 0), (x, y, width, height), 2)  # Black border
+
+        # Draw current health as black numbers inside the bar
+        health_text = f"{entity.get_current_hp()}/{entity.get_max_hp()}"
+        font = pygame.font.Font(self.font_path, 20)  # Adjust font size as needed
+        text_surface = font.render(health_text, True, (0, 0, 0))
+        text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
+        self.window.blit(text_surface, text_rect)
+
 
     def draw_combat_ui(self):
         self.window.blit(self.turn_background_image, (0, 0))
@@ -74,8 +85,6 @@ class Turnbased:
         self.draw_action_log()
 
         pygame.display.flip()
-
-
 
     def draw_attack_options(self):
         panel_top = self.window.get_height() - 150

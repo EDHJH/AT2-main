@@ -28,6 +28,9 @@ class Map:
         self.current_enemy = None
         self.game_over = False
 
+        # Font
+        self.font_path = "assets/slkscre.ttf"
+
         # Create a player instance
         self.player = None
         self.turn_based_combat = None  # Initialize the turn-based combat system
@@ -96,18 +99,27 @@ class Map:
         self.handle_combat()
     
     def draw_health_bar(self, entity, x, y, width, height):
-    # Calculate health percentage
+        # Calculate health percentage
         health_percentage = entity.get_current_hp() / entity.get_max_hp()
 
         # Calculate the width of the health bar
         health_bar_width = int(width * health_percentage)
 
-        # Draw the health bar background
+        # Draw the health bar background (red for missing health)
         pygame.draw.rect(self.window, (255, 0, 0), (x, y, width, height))  # Red background
 
-        # Draw the current health
+        # Draw the current health (green)
         pygame.draw.rect(self.window, (0, 255, 0), (x, y, health_bar_width, height))  # Green health
 
+        # Draw black border around the health bar
+        pygame.draw.rect(self.window, (0, 0, 0), (x, y, width, height), 2)  # Black border
+
+        # Draw current health as black numbers inside the bar
+        health_text = f"{entity.get_current_hp()}/{entity.get_max_hp()}"
+        font = pygame.font.Font(self.font_path, 20)  # Use the same font path and size as turn-based combat
+        text_surface = font.render(health_text, True, (0, 0, 0))
+        text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
+        self.window.blit(text_surface, text_rect)
 
     def draw(self):
         self.window.fill((0, 0, 0))
@@ -115,9 +127,10 @@ class Map:
         self.window.blit(self.player_image, (self.player_position[0], self.player_position[1]))
         for enemy in self.enemies:
             enemy.draw()
-
+        
         # Draw player health bar on the top left corner
         self.draw_health_bar(self.player, 10, 10, 200, 20)
 
         pygame.display.flip()
+
 
