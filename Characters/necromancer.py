@@ -91,6 +91,9 @@ class Necromancer(Character):
     def consume_stamina(self, amount):
         self.__current_stamina = max(0, self.__current_stamina - amount)
 
+    def heal(self, amount):
+        self.__current_hp = min(self.__max_hp, self.__current_hp + amount)
+        
     def regenerate_stamina(self, full=False):
         if full:
             self.__current_stamina = self.__max_stamina  # Fully regenerate stamina

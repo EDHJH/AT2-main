@@ -24,6 +24,11 @@ class Turnbased:
         self.showing_special_attacks = False
         self.action_log = []  # To store the logs of actions
 
+        # Potions
+        self.showing_items = False
+        self.health_potions = 3
+        self.stamina_potions = 3
+
         # Load player image
         self.player_image = pygame.image.load(GAME_ASSETS[f"{self.player.get_character_class().lower()}"]).convert_alpha()
         self.player_image = pygame.transform.scale(self.player_image, (int(self.player_image.get_width() * 0.75), int(self.player_image.get_height() * 0.75)))
@@ -79,6 +84,21 @@ class Turnbased:
         text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
         self.window.blit(text_surface, text_rect)
 
+    def use_health_potion(self):
+        if self.health_potions > 0:
+            self.player.heal(30)
+            self.health_potions -= 1
+            self.action_log.append("Used a health potion. Restored 30 HP.")
+        else:
+            self.action_log.append("No health potions left!")
+    
+    def use_stamina_potion(self):
+        if self.stamina_potions > 0:
+            self.player.regenerate_stamina(full=True)
+            self.stamina_potions -= 1
+            self.action_log.append("Used a stamina potion. Restored 50 stamina.")
+        else:
+            self.action_log.append("No stamina potions left!")
 
     def draw_combat_ui(self):
         self.window.blit(self.turn_background_image, (0, 0))
@@ -116,15 +136,14 @@ class Turnbased:
     def draw_attack_options(self):
         panel_top = self.window.get_height() - 150
 
-        if not self.showing_special_attacks:
-            # Draw main attack options
+        if self.showing_items:
+            options = [f"Health Potion ({self.health_potions})", f"Stamina Potion ({self.stamina_potions})", "Back"]
+        elif not self.showing_special_attacks:
             options = ["Attack", "Special Attacks", "Use Items", "Run"]
         else:
-            # Draw special attack options with a return button
             attacks = self.player.get_attacks()
             attack_list = list(attacks.items())
             options = [attack for attack, info in attack_list]
-            options.append("Return")
 
         self.button_rects = []
         button_width = 200
@@ -139,8 +158,6 @@ class Turnbased:
         for i, option in enumerate(options):
             rect_x = start_x + (i % 2) * (button_width + padding_x + (50 if i in [1, 3] else 0))  # Adjust x position for Special Attacks and Run buttons
             rect_y = start_y + (i // 2) * (button_height + padding_y)
-            if option == "Return":
-                rect_y += padding_y + button_height  # Position the return button vertically below the others
             rect = pygame.Rect(rect_x, rect_y, button_width, button_height)
             
             if rect.collidepoint(mouse_pos):
@@ -154,8 +171,6 @@ class Turnbased:
             text_rect = rendered_text.get_rect(center=rect.center)
             self.window.blit(rendered_text, text_rect)
             self.button_rects.append((rect, option))
-
-
 
 
     def draw_action_log(self):
@@ -174,7 +189,6 @@ class Turnbased:
         log = f"Player regenerates {self.player.get_stamina_regeneration()} stamina."
         self.action_log.append(log)
 
-
     def handle_events(self):
         events = pygame.event.get()
         for event in events:
@@ -183,29 +197,37 @@ class Turnbased:
                     mouse_pos = event.pos
                     for i, (rect, option) in enumerate(self.button_rects):
                         if rect.collidepoint(mouse_pos):
-                            if not self.showing_special_attacks:
+                            if self.showing_items:
+                                if option.startswith("Health Potion"):
+                                    self.use_health_potion()
+                                    self.showing_items = False
+                                    return 'item_used'
+                                elif option.startswith("Stamina Potion"):
+                                    self.use_stamina_potion()
+                                    self.showing_items = False
+                                    return 'item_used'
+                                elif option == "Back":
+                                    self.showing_items = False
+                                    return None
+                            elif not self.showing_special_attacks:
                                 if option == "Attack":
                                     return "basic_attack"
                                 elif option == "Special Attacks":
-                                    # Check if there is enough stamina for any special attack
-                                    attacks = self.player.get_attacks()
-                                    if all(self.player.get_current_stamina() < info["stamina_cost"] for attack, info in attacks.items()):
-                                        self.action_log.append("Not enough stamina to use any special attack!")
-                                        return None
-                                    self.showing_special_attacks = True
-                                    self.selected_attack = 0
+                                    if self.player.get_current_stamina() >= min([info['stamina_cost'] for info in self.player.get_attacks().values()]):
+                                        self.showing_special_attacks = True
+                                        self.selected_attack = 0
+                                    else:
+                                        self.action_log.append("Not enough stamina to use any special attacks!")
                                     return None
                                 elif option == "Use Items":
-                                    return "use_item"
+                                    self.showing_items = True
+                                    self.selected_attack = 0
+                                    return None
                                 elif option == "Run":
                                     return "run"
                             else:
-                                if option == "Return":
-                                    self.showing_special_attacks = False
-                                    return None
-                                return i
+                                return i  # Return the index for special attacks
         return None
-
 
 
 
@@ -250,6 +272,14 @@ class Turnbased:
                     return 'run_failed'
             else:  # Special attack
                 attack_list = list(self.player.get_attacks().keys())
+                # Ensure selected_option is an index here
+                if isinstance(selected_option, str):
+                    try:
+                        selected_option = int(selected_option)
+                    except ValueError:
+                       
+                        return 'not_player_turn'
+                
                 attack_name = attack_list[selected_option]
                 attack_info = self.player.get_attacks()[attack_name]
                 if self.player.get_current_stamina() >= attack_info["stamina_cost"]:
