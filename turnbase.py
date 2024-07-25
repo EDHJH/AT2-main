@@ -282,7 +282,7 @@ class Turnbased:
                         selected_option = int(selected_option)
                     except ValueError:
                         return 'not_player_turn'
-                
+
                 attack_name = attack_list[selected_option]
                 attack_info = self.player.get_attacks()[attack_name]
                 if self.player.get_current_stamina() >= attack_info["stamina_cost"]:
@@ -306,11 +306,10 @@ class Turnbased:
                     log = f"Not enough stamina to use {attack_name}!"
                     self.action_log.append(log)
         if self.player.get_current_hp() <= 0:
-            self.display_dead_screen()
+            result = self.display_dead_screen()
+            if result == 'main_menu':
+                return 'main_menu'
         return 'not_player_turn'
-
-
-
 
     def enemy_attack(self):
         if not self.player_turn:
@@ -321,7 +320,9 @@ class Turnbased:
                 log = "Player defeated!"
                 self.action_log.append(log)
                 self.showing_special_attacks = False  # Reset to main attack options
-                self.display_dead_screen()  # Display the dead screen
+                result = self.display_dead_screen()  # Display the dead screen
+                if result == 'main_menu':
+                    return 'main_menu'
                 return 'player_defeated'
             self.player_turn = True
             self.showing_special_attacks = False  # Reset to main attack options
@@ -332,12 +333,39 @@ class Turnbased:
         return 'not_enemy_turn'
 
 
+
     def display_dead_screen(self):
         self.window.blit(self.dead_screen_image, (0, 0))
+        
+        # Draw quit button
+        button_width = 250
+        button_height = 60
+        padding_y = 20
+
+        quit_rect = pygame.Rect(self.window.get_width() // 2 - button_width // 2, self.window.get_height() - button_height - padding_y, button_width, button_height)
+
+        pygame.draw.rect(self.window, (255, 255, 255), quit_rect, 2)
+
+        font = self.find_font_size("Quit", button_width - 10, button_height - 10)
+        quit_text = font.render("Quit", True, (255, 255, 255))
+        quit_text_rect = quit_text.get_rect(center=quit_rect.center)
+        self.window.blit(quit_text, quit_text_rect)
+
+        self.button_rects = [(quit_rect, "Quit")]
+
         pygame.display.flip()
-        pygame.time.delay(3000)  # Display the dead screen for 3 seconds
-        pygame.quit()
-        exit()  # Exit the game
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left mouse button click
+                        mouse_pos = event.pos
+                        for rect, option in self.button_rects:
+                            if rect.collidepoint(mouse_pos) and option == "Quit":
+                                pygame.quit()
+                                exit()
+
+
 
 
 

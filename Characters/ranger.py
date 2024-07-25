@@ -2,7 +2,7 @@ from Characters.character import Character
 
 class Ranger(Character):
     def __init__(self, name, max_hp):
-        super().__init__(name, "Ranger", armor=8)
+        super().__init__(name, "Ranger", armor=7)
         self.__max_stamina = 100
         self.__current_stamina = self.__max_stamina
         self.__stamina_regeneration = 10
@@ -85,7 +85,7 @@ class Ranger(Character):
 
     def heal(self, amount):
         self.__current_hp = min(self.__max_hp, self.__current_hp + amount)
-        
+
     def regenerate_stamina(self, full=False):
         if full:
             self.__current_stamina = self.__max_stamina  # Fully regenerate stamina

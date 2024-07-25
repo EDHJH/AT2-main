@@ -93,9 +93,8 @@ class Game:
                         continue
 
             elif self.state == 'game_over':
-                # Here you could handle game over state, such as restarting or going to a game over screen
-                print("Game over. Returning to main menu.")
-                self.state = 'menu'
+                self.turnbased.display_dead_screen()
+
 
 if __name__ == "__main__":
     game = Game()

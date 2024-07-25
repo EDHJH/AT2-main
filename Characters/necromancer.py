@@ -55,12 +55,6 @@ class Necromancer(Character):
         damage = self.__strength
         target.take_damage(damage)
         return damage
-    
-    def basic_attack(self, target):
-        print(f"\n{self.get_name()} attacks {target.get_name()} with a basic attack!")
-        damage = self.__strength
-        target.take_damage(damage)
-        return damage
 
     def reap(self, target):
         print(f"\n{self.get_name()} reaps the soul of {target.get_name()}!")
@@ -93,7 +87,7 @@ class Necromancer(Character):
 
     def heal(self, amount):
         self.__current_hp = min(self.__max_hp, self.__current_hp + amount)
-        
+
     def regenerate_stamina(self, full=False):
         if full:
             self.__current_stamina = self.__max_stamina  # Fully regenerate stamina
