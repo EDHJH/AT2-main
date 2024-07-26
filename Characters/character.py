@@ -1,6 +1,5 @@
 class Character:
-    MAX_LEVEL = 50  # Maximum level a character can reach
-    ATTRIBUTE_POINTS_PER_LEVEL = 3  # Number of attribute points gained per level
+    MAX_LEVEL = 10  # Maximum level a character can reach
 
     def __init__(self, name, character_class, armor):
         self.__name = name  # Character's name
@@ -8,15 +7,12 @@ class Character:
         self.__armor = armor  # Character's armor value
         self.__level = 1  # Character's current level
         self.__experience_points = 0  # Character's current experience points
-        self.__hit_points = 10  # Example starting value for character's hit points
-        self.__armor_class = 10  # Example starting value for character's armor class
-        self.__skills = {}  # Example empty dictionary for character's skills
-        self.__inventory = []  # Example empty list for character's inventory
-        self.__gold = 0  # Example starting value for character's gold
-        self.__attribute_points = 0  # Attribute points available to allocate
+        self.__hit_points = 10 
+        self.__armor_class = 10  
         self.__current_hp = self.__hit_points  # Example starting current HP
         self.__current_stamina = 100  # Example starting current stamina
         self.__max_stamina = 100  # Example maximum stamina
+        self.__strength = 1  
         self.__attacks = {}  # Example attacks
 
     # Getter methods
@@ -50,9 +46,6 @@ class Character:
     def get_gold(self):
         return self.__gold
 
-    def get_attribute_points(self):
-        return self.__attribute_points
-
     def get_current_hp(self):
         return self.__current_hp
 
@@ -64,6 +57,9 @@ class Character:
 
     def get_max_stamina(self):
         return self.__max_stamina
+
+    def get_strength(self):
+        return self.__strength
 
     def get_attacks(self):
         return self.__attacks
@@ -95,7 +91,7 @@ class Character:
         else:  # Special attack
             attack_method = self.__attacks[attack_name]["method"]
             stamina_cost = self.__attacks[attack_name]["stamina_cost"]
-        
+
         if self.get_current_stamina() >= stamina_cost:
             self._current_stamina -= stamina_cost
             return attack_method(target)
@@ -113,29 +109,13 @@ class Character:
     def increase_strength(self, amount):
         self.__strength += amount
 
-    def increase_defense(self, amount):
-        self.__armor += amount
-
     def level_up(self):
         self.__level += 1
-
-    def assign_attribute_points(self, attribute, points):
-        if attribute in self.__dict__:
-            setattr(self, attribute, getattr(self, attribute) + points)  # Add points to the attribute
-            self.__attribute_points -= points  # Decrease available attribute points
-        else:
-            print(f"Error: Attribute '{attribute}' does not exist.")
-
-    def gain_experience(self, experience):
-        self.__experience_points += experience  # Increase character's experience points
-        required_experience = self.calculate_required_experience(self.__level + 1)
-        while self.__experience_points >= required_experience and self.__level < self.MAX_LEVEL:
-            self.__level += 1  # Level up the character
-            self.__experience_points -= required_experience  # Decrease character's experience points
-            self.__hit_points += 10  # Example: Increase hit points by 10 each level up
-            self.__attribute_points += self.ATTRIBUTE_POINTS_PER_LEVEL  # Allocate attribute points
-            print(f"Level up! {self.__name} is now level {self.__level}.")
-            required_experience = self.calculate_required_experience(self.__level + 1)
+        self.__hit_points += 10  # Increase max health by 10
+        self.__max_stamina += 20  # Increase max stamina by 20
+        self.__strength += 1  # Increase strength by 1
+        self.__current_hp = self.__hit_points  # Optionally heal the player to full health
+        print(f"Level up! {self.get_name()} is now level {self.__level}.")
 
     def calculate_required_experience(self, level):
         return int(100 * (1.5 ** (level - 1)))

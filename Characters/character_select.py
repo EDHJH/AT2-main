@@ -2,30 +2,8 @@ import pygame
 from assets import GAME_ASSETS
 
 class CharacterSelect:
-    """
-    A class representing the character selection screen.
-
-    Attributes:
-        window (pygame.Surface): The game window surface.
-        font (pygame.font.Font): The font used for text rendering.
-        background_image (pygame.Surface): The background image of the character selection screen.
-        characters (dict): A dictionary mapping character names to their corresponding button images.
-        character_buttons (dict): A dictionary mapping character names to their button rectangles.
-        back_button (pygame.Rect): The rectangle representing the back button.
-
-    Methods:
-        __init__(self, window): Initializes the CharacterSelect object.
-        setup_character_buttons(self): Sets up the character buttons.
-        run(self): Runs the character selection screen loop.
-    """
 
     def __init__(self, window):
-        """
-        Initializes the CharacterSelect object.
-
-        Args:
-            window (pygame.Surface): The game window surface.
-        """
         self.window = window
         self.font = pygame.font.Font(None, 36)  # Use a default font
         self.background_image = pygame.image.load(GAME_ASSETS['main_menu_background']).convert()
@@ -39,18 +17,13 @@ class CharacterSelect:
         self.back_button = pygame.Rect(50, self.window.get_height() - 50 - 30, 100, 30)  # Positioned at bottom left
 
     def setup_character_buttons(self):
-        """
-        Sets up the character buttons.
 
-        Returns:
-            dict: A dictionary mapping character names to their button rectangles.
-        """
         buttons = {}
         total_spacing = 40  # spacing between buttons and edges
         num_buttons = len(self.characters)
         available_width = self.window.get_width() - total_spacing * (num_buttons + 1)
         button_width = available_width // num_buttons
-        max_height = self.window.get_height() // 4  # maximum button height
+        max_height = self.window.get_height() // 1.6  # maximum button height
 
         x = total_spacing
         y = self.window.get_height() // 3 - max_height // 2  # position them a bit higher to make space for back button

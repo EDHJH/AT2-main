@@ -6,7 +6,7 @@ class Ranger(Character):
         self.__max_stamina = 100
         self.__current_stamina = self.__max_stamina
         self.__stamina_regeneration = 10
-        self.__strength = 15
+        self.__strength = 25
         self.__max_hp = max_hp
         self.__current_hp = max_hp
         self.level = 1  

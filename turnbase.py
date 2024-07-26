@@ -234,7 +234,7 @@ class Turnbased:
                             else:
                                 return i  # Return the index for special attacks
         return None
-
+    
     def player_attack(self):
         selected_option = self.handle_events()
         if selected_option is not None:
@@ -360,50 +360,6 @@ class Turnbased:
                             if rect.collidepoint(mouse_pos) and option == "Quit":
                                 pygame.quit()
                                 exit()
-
-    def display_level_up_choices(self):
-        # Define the choices
-        choices = [
-            ("+20 Health", "health"),
-            ("+30 Max Stamina", "stamina"),
-            ("+2 Strength", "strength"),
-            ("+1 Defense", "defense")
-        ]
-
-        # Display choices
-        choice_rects = []
-        for index, (text, _) in enumerate(choices):
-            choice_rect = pygame.Rect(50, 150 + index * 50, 300, 40)
-            pygame.draw.rect(self.window, (0, 0, 0), choice_rect)
-            pygame.draw.rect(self.window, (255, 255, 255), choice_rect, 2)
-            font = pygame.font.Font(None, 36)
-            text_surface = font.render(text, True, (255, 255, 255))
-            self.window.blit(text_surface, (60, 160 + index * 50))
-            choice_rects.append((choice_rect, text))
-
-        pygame.display.flip()
-
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    mouse_pos = pygame.mouse.get_pos()
-                    for choice_rect, choice_type in choice_rects:
-                        if choice_rect.collidepoint(mouse_pos):
-                            return choice_type
-
-    def handle_level_up(self):
-        choice = self.display_level_up_choices()
-        if choice == "health":
-            self.player.increase_max_hp(20)
-        elif choice == "stamina":
-            self.player.increase_max_stamina(30)
-        elif choice == "strength":
-            self.player.increase_strength(2)
-        elif choice == "defense":
-            self.player.increase_defense(1)
 
     def find_font_size(self, text, max_width, max_height):
         font_size = 36

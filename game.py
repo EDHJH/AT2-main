@@ -16,12 +16,10 @@ class Game:
         self.state = 'menu'  # Set the initial state to 'menu'
         self.current_character = None  # To store the chosen character
         self.turnbased = None  # Initialize turnbased combat placeholder
-        self.clock = pygame.time.Clock()  # Add this line to control the frame rate
 
     def run(self):
         running = True
         while running:
-            self.clock.tick(120)  # Limit the frame rate to 60 FPS
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
@@ -33,8 +31,6 @@ class Game:
                 result = self.menu.handle_events(events)
                 if result == 'Start Game':
                     self.state = 'character_select'
-                elif result == 'Settings':
-                    # Settings handling would go here
                     pass
                 elif result == 'Exit':
                     pygame.quit()
@@ -61,7 +57,6 @@ class Game:
                     return
                 else:
                     self.game_map.draw()
-
                 # Check for combat state
                 if self.game_map.in_combat:
                     self.state = 'combat'
@@ -75,8 +70,20 @@ class Game:
                     if result == 'enemy_defeated':
                         print("You won the combat!")
                         self.game_map.enemies.remove(self.game_map.current_enemy)
+                        self.game_map.player.level_up()  # Level up the player after defeating an enemy
+                        self.game_map.player.increase_max_hp(10)
+                        self.game_map.player.increase_max_stamina(20)
+                        self.game_map.player.increase_strength(1)
+                        if self.game_map.player.get_level() == 5:
+                            self.game_map.map_image = pygame.image.load(GAME_ASSETS["dungeon_map1"]).convert_alpha()
+                            self.game_map.map_image = pygame.transform.scale(self.game_map.map_image, (self.game_map.window.get_width(), self.game_map.window.get_height()))
+                            self.game_map.reload_mobs()  # Reload the mobs
+                        if self.game_map.player.get_level() == 9 and not self.game_map.boss_spawned:
+                            self.game_map.spawn_boss()
+                            self.game_map.boss_spawned = True
                         self.game_map.in_combat = False
                         self.state = 'game_map'
+
                     elif result == 'player_attacked':
                         continue
                     elif result == 'run_successful':
@@ -96,10 +103,6 @@ class Game:
 
             elif self.state == 'game_over':
                 self.turnbased.display_dead_screen()
-
-
-            pygame.display.update()
-
 
 if __name__ == "__main__":
     game = Game()

@@ -3,13 +3,13 @@ from Characters.character import Character
 class Necromancer(Character):
     def __init__(self, name, max_hp):
         super().__init__(name, "Necromancer", armor=7)
+        # Initialize other attributes if necessary
         self.__max_stamina = 150
         self.__current_stamina = self.__max_stamina
         self.__stamina_regeneration = 15
         self.__strength = 10
         self.__max_hp = max_hp
         self.__current_hp = max_hp
-        self.level = 1  
         self.__attacks = {
             "Reap": {"method": self.reap, "stamina_cost": 20},
             "Dark Blast": {"method": self.dark_blast, "stamina_cost": 20},
@@ -50,7 +50,7 @@ class Necromancer(Character):
     # Functions
     def regenerate_stamina(self):
         self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
-    
+
     def basic_attack(self, target):
         print(f"{self.get_name()} attacks {target.get_name()} with a basic attack!")
         damage = self.__strength
@@ -94,4 +94,3 @@ class Necromancer(Character):
             self.__current_stamina = self.__max_stamina  # Fully regenerate stamina
         else:
             self.__current_stamina = min(self.__max_stamina, self.__current_stamina + self.__stamina_regeneration)
-
