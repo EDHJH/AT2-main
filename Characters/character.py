@@ -103,6 +103,21 @@ class Character:
             print("Not enough stamina for this attack.")
             return 0
 
+    def increase_max_hp(self, amount):
+        self.__hit_points += amount
+        self.__current_hp += amount  # Optionally heal the player
+
+    def increase_max_stamina(self, amount):
+        self.__max_stamina += amount
+
+    def increase_strength(self, amount):
+        self.__strength += amount
+
+    def increase_defense(self, amount):
+        self.__armor += amount
+
+    def level_up(self):
+        self.__level += 1
 
     def assign_attribute_points(self, attribute, points):
         if attribute in self.__dict__:
