@@ -27,6 +27,7 @@ class Map:
         self.in_combat = False
         self.current_enemy = None
         self.game_over = False
+        self.blue_orb = None
 
         # Font
         self.font_path = "assets/slkscre.ttf"
@@ -46,6 +47,9 @@ class Map:
         self.last_stats_toggle = 0  # To handle the toggle delay
         self.stats_toggle_delay = 0.2  # 200 milliseconds delay
 
+        # player levels
+        self.player_level = 1  # Initialize player level
+        self.level_up_options = False
 
 
     def load_player(self, character_type):
@@ -58,6 +62,31 @@ class Map:
             self.player = Warrior("Player", 150)  # Create a Warrior player with 150 HP
         elif character_type == "Ranger":
             self.player = Ranger("Player", 120)  # Create a Ranger player with 120 HP
+
+    def level_up(self):
+        self.player_level += 1  # Increase player level
+        self.skill_points += 5  # Add 5 skill points
+
+    def spawn_blue_orb(self):
+        """
+        Spawn the blue orb in the center of the map.
+        """
+        self.blue_orb = pygame.image.load(GAME_ASSETS["blue_orb"]).convert_alpha()
+        self.blue_orb = pygame.transform.scale(self.blue_orb, (50, 50))
+        self.orb_position = [self.window.get_width() / 2 - 25, self.window.get_height() / 2 - 25]
+
+    def check_orb_collision(self):
+        """
+        Check if the player has collided with the blue orb.
+
+        Returns:
+            bool: True if the player has collided with the blue orb, False otherwise.
+        """
+        if self.blue_orb and pygame.math.Vector2(self.orb_position).distance_to(self.player_position) < 25:
+            self.game_over = True
+            print("YOU WIN")  # This can be modified to a more visual display if needed.
+            return True
+        return False
 
     def check_for_combat(self):
         current_time = time.time()
@@ -80,12 +109,15 @@ class Map:
                     self.in_combat = False
                     self.turn_based_combat = None
                     self.current_enemy = None
+                    self.player.level += 1  # Increase player level
+                    self.level_up_options = True  # Show level up options
                     if not self.enemies:
                         self.spawn_blue_orb()
             else:
                 result = self.turn_based_combat.enemy_attack()
                 if result == 'player_defeated':
                     self.game_over = True
+
 
     def handle_events(self):
         if self.game_over:
@@ -102,11 +134,23 @@ class Map:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
                     mouse_pos = pygame.mouse.get_pos()
-                    if self.stats_button_rect.collidepoint(mouse_pos) and current_time - self.last_stats_toggle > self.stats_toggle_delay:
-                        self.show_stats = not self.show_stats  # Toggle stats display
-                        self.last_stats_toggle = current_time
+                    if self.level_up_options:
+                        if self.health_option_rect.collidepoint(mouse_pos):
+                            self.player.max_hp += 20
+                            self.player.current_hp += 20
+                            self.level_up_options = False
+                        elif self.stamina_option_rect.collidepoint(mouse_pos):
+                            self.player.max_stamina += 30
+                            self.player.current_stamina += 30
+                            self.level_up_options = False
+                        elif self.strength_option_rect.collidepoint(mouse_pos):
+                            self.player.strength += 2
+                            self.level_up_options = False
+                        elif self.defense_option_rect.collidepoint(mouse_pos):
+                            self.player.armor += 1
+                            self.level_up_options = False
 
-        if not self.in_combat:
+        if not self.in_combat and not self.level_up_options:
             # Movement
             if keys[pygame.K_a] and self.player_position[0] > 0:  # Move left if 'a' is pressed and within boundary
                 self.player_position[0] -= move_speed
@@ -121,11 +165,12 @@ class Map:
                 self.show_stats = not self.show_stats  # Toggle stats display
                 self.last_stats_toggle = current_time
 
-        if not self.in_combat:
+        if not self.in_combat and not self.level_up_options:
             if self.check_for_combat():
                 return
         self.handle_combat()
         self.draw()
+
 
 
     def draw_health_bar(self, entity, x, y, width, height):
@@ -187,6 +232,7 @@ class Map:
         font = pygame.font.Font(self.font_path, 24)
 
         stats_texts = [
+            f"Level: {self.player.level}",  # Display player level
             f"Health: {self.player.get_current_hp()}",
             f"Strength: {self.player.get_strength()}",
             f"Stamina: {self.player.get_current_stamina()}",
@@ -212,6 +258,33 @@ class Map:
             text_surface = font.render(f"{attack}: {info['stamina_cost']} stamina", True, (255, 255, 255))
             self.window.blit(text_surface, (stats_rect.left + 10, y_offset))
             y_offset += 30
+
+
+
+    def draw_level_up_options(self):
+        options_rect = pygame.Rect(self.window.get_width() // 2 - 150, self.window.get_height() // 2 - 100, 300, 200)
+        pygame.draw.rect(self.window, (0, 0, 0), options_rect)
+        pygame.draw.rect(self.window, (255, 255, 255), options_rect, 2)  # White border
+
+        font = pygame.font.Font(self.font_path, 24)
+        options_texts = [
+            "+20 Health",
+            "+30 Max Stamina",
+            "+2 Strength",
+            "+1 Defense"
+        ]
+
+        self.health_option_rect = pygame.Rect(options_rect.left + 50, options_rect.top + 30, 200, 30)
+        self.stamina_option_rect = pygame.Rect(options_rect.left + 50, options_rect.top + 70, 200, 30)
+        self.strength_option_rect = pygame.Rect(options_rect.left + 50, options_rect.top + 110, 200, 30)
+        self.defense_option_rect = pygame.Rect(options_rect.left + 50, options_rect.top + 150, 200, 30)
+
+        for i, option in enumerate(options_texts):
+            option_rect = getattr(self, f"{option.split()[1].lower()}_option_rect")
+            pygame.draw.rect(self.window, (0, 0, 0), option_rect)
+            pygame.draw.rect(self.window, (255, 255, 255), option_rect, 2)
+            option_surface = font.render(option, True, (255, 255, 255))
+            self.window.blit(option_surface, (option_rect.left + 10, option_rect.top + 5))
 
 
     def draw(self):
@@ -240,5 +313,8 @@ class Map:
 
         if self.show_stats:
             self.draw_stats_screen()
+
+        if self.level_up_options:
+            self.draw_level_up_options()
 
         pygame.display.flip()

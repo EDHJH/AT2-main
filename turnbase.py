@@ -317,9 +317,7 @@ class Turnbased:
                 log = "Player defeated!"
                 self.action_log.append(log)
                 self.showing_special_attacks = False  # Reset to main attack options
-                result = self.display_dead_screen()  # Display the dead screen
-                if result == 'main_menu':
-                    return 'main_menu'
+                self.display_dead_screen()  # Display the dead screen
                 return 'player_defeated'
             self.player_turn = True
             self.showing_special_attacks = False  # Reset to main attack options
@@ -328,6 +326,7 @@ class Turnbased:
                 self.regenerate_stamina()
             return 'enemy_attacked'
         return 'not_enemy_turn'
+
 
 
 

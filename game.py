@@ -16,10 +16,12 @@ class Game:
         self.state = 'menu'  # Set the initial state to 'menu'
         self.current_character = None  # To store the chosen character
         self.turnbased = None  # Initialize turnbased combat placeholder
+        self.clock = pygame.time.Clock()  # Add this line to control the frame rate
 
     def run(self):
         running = True
         while running:
+            self.clock.tick(120)  # Limit the frame rate to 60 FPS
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
@@ -94,6 +96,7 @@ class Game:
 
             elif self.state == 'game_over':
                 self.turnbased.display_dead_screen()
+
 
             pygame.display.update()
 

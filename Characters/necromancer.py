@@ -9,6 +9,7 @@ class Necromancer(Character):
         self.__strength = 10
         self.__max_hp = max_hp
         self.__current_hp = max_hp
+        self.level = 1  
         self.__attacks = {
             "Reap": {"method": self.reap, "stamina_cost": 20},
             "Dark Blast": {"method": self.dark_blast, "stamina_cost": 20},

@@ -9,6 +9,7 @@ class Warrior(Character):
         self.__strength = 100
         self.__max_hp = max_hp
         self.__current_hp = max_hp
+        self.level = 1  
         self.__attacks = {
             "Charge": {"method": self.charge, "stamina_cost": 20},
             "Cleave Attack": {"method": self.cleave_attack, "stamina_cost": 30},

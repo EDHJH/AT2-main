@@ -23,6 +23,9 @@ class Enemy:
         ]
         self.window.blit(self.image, adjusted_position)
 
+    def is_defeated(self):
+        return self.health <= 0
+    
     def get_name(self):
         return self.name
 
